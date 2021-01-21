@@ -1,11 +1,10 @@
 const routes = require('express').Router()
 const cinemasController = require('../controllers/cinemas')
 
-routes.get('/', cinemasController.getCinemasByAdmin)
-routes.get('/:id', cinemasController.DetailCinemaByAdmin)
-routes.post('/', cinemasController.PostCinemaByAdmin)
-routes.put('/:id', cinemasController.PutCinemaByAdmin)
-routes.patch('/:id', cinemasController.patchCinemaByAdmin)
-routes.delete('/:id', cinemasController.deleteCinemaByAdmin)
+routes.post('/', cinemasController.createCinema)
+routes.get('/', cinemasController.listAllCinema)
+routes.get('/:id', cinemasController.getDetailCinema)
+routes.delete('/:id', cinemasController.deleteMovie)
+routes.patch('/:id', cinemasController.updateCinema)
 
 module.exports = routes

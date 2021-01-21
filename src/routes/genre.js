@@ -1,6 +1,7 @@
 const routes = require('express').Router()
-const moviesController = require('../controllers/movies')
+const genreController = require('../controllers/genre')
 
-routes.get('/:name', moviesController.ListMoviesByGenre)
+routes.get('/', genreController.listAllGenre)
+routes.get('/:id', genreController.getDetailGenre)
 
 module.exports = routes
