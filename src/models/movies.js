@@ -26,12 +26,14 @@ exports.createMoviesAsync = (data = {}, cb) => {
   })
 }
 
-exports.getMovieById = (id, cb) => {
-  db.query(`
-  SELECT * FROM movie WHERE id=${id}
-  `, (err, res, field) => {
-    if (err) throw err
-    cb(res)
+exports.getMovieById = (id) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
+    SELECT * FROM movie WHERE id=${id}
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
   })
 }
 
@@ -46,13 +48,16 @@ exports.getMovieByIdAsync = async (id, cb) => {
   })
 }
 
-exports.deleteMovieById = (id, cb) => {
-  db.query(`
-  DELETE FROM movie WHERE id=${id}
-  `, (err, res, field) => {
-    if (err) throw err
-    cb(res)
+exports.deleteMovieById = (id) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
+    DELETE FROM movie WHERE id=${id}
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
   })
+ 
 }
 
 exports.getAllMovies = (cb) => {
@@ -74,16 +79,18 @@ exports.getMoviesByCondition = (cond, cb) => {
   })
 }
 
-exports.updateMovie = (id, data, cb) => {
-  const key = Object.keys(data)
-  const value = Object.values(data)
-  db.query(`
-    UPDATE movie
-    SET ${key.map((item, index) => `${item}="${value[index]}"`)}
-    WHERE id=${id}
-  `, (err, res, field) => {
-    if (err) throw err
-    cb(res)
+exports.updateMovie = (id, data) => {
+  return new Promise((resolve, reject) => {
+    const key = Object.keys(data)
+    const value = Object.values(data)
+    db.query(`
+      UPDATE movie
+      SET ${key.map((item, index) => `${item}="${value[index]}"`)}
+      WHERE id=${id}
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
   })
 }
 
@@ -107,6 +114,7 @@ exports.getMovieByIdWithGenreAsync = (id) => {
     INNER JOIN genre g ON g.id=mi.idGenre
     WHERE m.id=${id}
   `, (err, res, field) => {
+      console.log(res)
       if (err) reject(err)
       resolve(res)
     })

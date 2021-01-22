@@ -17,7 +17,7 @@ exports.createTransactionAsync = (data = {}, cb) => {
 exports.getTransactionJoin = (id) => {
   return new Promise((resolve, reject) => {
     const query = db.query(`
-    SELECT m.id, m.title, g.name as genreName
+    SELECT m.id, m.title, s.name as seatName, st.name as showTimeName, c.name as cinemaName
     FROM movie m
     INNER JOIN movies_info mi ON m.id=mi.idMovie
     INNER JOIN genre g ON g.id=mi.idGenre
