@@ -15,12 +15,13 @@ exports.createSeatAsync = (data = {}, cb) => {
 }
 
 exports.getSeatById = (id, cb) => {
-  db.query(`
+  return new Promise((resolve, reject) => {
+    db.query(`
     SELECT * FROM seat WHERE id=${id}
     `, (err, res, field) => {
-    console.log(res)
-    if (err) throw err
-    cb(res)
+      if (err) reject(err)
+      resolve(res)
+    })
   })
 }
 
@@ -35,47 +36,55 @@ exports.getSeatByIdAsync = async (id, cb) => {
   })
 }
 
-exports.getSeatByCondition = (cond, cb) => {
-  db.query(`
+exports.getSeatByCondition = (cond) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
     SELECT * FROM
     seat WHERE name LIKE "%${cond.search}%"
     ORDER BY ${cond.sort} ${cond.order}
     LIMIT ${cond.limit} OFFSET ${cond.offset}
     `, (err, res, field) => {
-    if (err) throw err
-    cb(res)
+      if (err) reject(err)
+      resolve(res)
+    })
   })
 }
 
-exports.totalDataSeats = (cond, cb) => {
-  db.query(`
-  SELECT * FROM
-  seat WHERE name LIKE "%${cond.search}%"
-  `, (err, res, field) => {
-    if (err) throw err
-    cb(res)
+exports.totalDataSeats = (cond) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
+    SELECT * FROM
+    seat WHERE name LIKE "%${cond.search}%"
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
   })
 }
 
 exports.updateSeat = (id, data, cb) => {
-  const key = Object.keys(data)
-  const value = Object.values(data)
-  db.query(`
-    UPDATE seat
-    SET ${key.map((item, index) => `${item}="${value[index]}"`)}
-    WHERE id=${id}
-  `, (err, res, field) => {
-    if (err) throw err
-    cb(res)
+  return new Promise((resolve, reject) => {
+    const key = Object.keys(data)
+    const value = Object.values(data)
+    db.query(`
+      UPDATE seat
+      SET ${key.map((item, index) => `${item}="${value[index]}"`)}
+      WHERE id=${id}
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
   })
 }
 
 exports.deleteSeatById = (id, cb) => {
-  db.query(`
-  DELETE FROM seat WHERE id=${id}
-  `, (err, res, field) => {
-    if (err) throw err
-    cb(res)
+  return new Promise((resolve, reject) => {
+    db.query(`
+    DELETE FROM seat WHERE id=${id}
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
   })
 }
 

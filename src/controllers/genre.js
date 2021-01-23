@@ -1,9 +1,10 @@
 const genreModels = require('../models/genres')
+const responseStatus = require('../helpers/responseStatus')
 const nextLink = require('../middlewares/nextLink')
 const prevLink = require('../middlewares/prevLink')
 const { APP_URL, APP_PORT } = process.env
 
-exports.createGenre = (req, res) => {
+exports.createGenre = async (req, res) => {
   const data = req.body
   const valueForm = Object.values(data).filter((items) => items === '')
   if (valueForm[0] === '') {
@@ -13,29 +14,32 @@ exports.createGenre = (req, res) => {
       results: []
     })
   }
-  genreModels.createGenre(data, (results) => {
+  try {
+    const results = await genreModels.createGenre(data)
     if (results.affectedRows > 0) {
-      genreModels.getGenreByid(results.insertId, (finalResult) => {
-        if (finalResult.length > 0) {
-          return res.json({
-            success: true,
-            message: 'Created Genre Successfully',
-            results: finalResult[0]
-          })
-        } else {
-          return res.status(400).json({
-            success: false,
-            message: 'Failed to Create Genre'
-          })
-        }
-      })
+      const finalResult = await genreModels.getGenreByid(results.insertId)
+      if (finalResult.length > 0) {
+        return res.json({
+          success: true,
+          message: 'Created Genre Successfully',
+          results: finalResult[0]
+        })
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: 'Failed to Create Genre'
+        })
+      }
     }
-  })
+  } catch (error) {
+    responseStatus.serverError(res)
+  }
 }
 
-exports.getDetailGenre = (req, res) => {
+exports.getDetailGenre = async (req, res) => {
   const { id } = req.params
-  genreModels.getGenreByid(id, results => {
+  try {
+    const results = await genreModels.getGenreByid(id)
     if (results.length > 0) {
       return res.json({
         success: true,
@@ -47,10 +51,12 @@ exports.getDetailGenre = (req, res) => {
       success: false,
       message: 'Genre not exixts'
     })
-  })
+  } catch (error) {
+    responseStatus.serverError(res)
+  }
 }
 
-exports.listAllGenre = (req, res) => {
+exports.listAllGenre = async (req, res) => {
   const cond = req.query
   cond.search = cond.search || ''
   cond.page = Number(cond.page) || 1
@@ -60,57 +66,61 @@ exports.listAllGenre = (req, res) => {
   cond.sort = cond.sort || 'id'
   cond.order = cond.order || 'ASC'
 
-  genreModels.getGenreByCondition(cond, results => {
-    genreModels.totalDataGenre(cond, totalData => {
-      return res.json({
-        success: true,
-        message: 'List of all Genre',
-        results,
-        pageInfo: {
-          totalData: totalData.length,
-          totalDataInCurrentPage: results.length,
-          nextLink: nextLink.nextLinkGenre(cond, totalData, APP_URL, APP_PORT),
-          prevLink: prevLink.prevLinkGenre(cond, totalData, APP_URL, APP_PORT)
-        }
-      })
+  try {
+    const results = await genreModels.getGenreByCondition(cond)
+    const totalData = await genreModels.totalDataGenre(cond)
+    return res.json({
+      success: true,
+      message: 'List of all Genre',
+      results,
+      pageInfo: {
+        totalData: totalData.length,
+        totalDataInCurrentPage: results.length,
+        nextLink: nextLink.nextLinkGenre(cond, totalData, APP_URL, APP_PORT),
+        prevLink: prevLink.prevLinkGenre(cond, totalData, APP_URL, APP_PORT)
+      }
     })
-  })
+  } catch (error) {
+    responseStatus.serverError(res)
+  }
 }
 
 exports.deleteGenre = async (req, res) => {
   const { id } = req.params
-  genreModels.getGenreByid(id, (initialResult) => {
+  try {
+    const initialResult = await genreModels.getGenreByid(id)
     if (initialResult.length > 0) {
-      genreModels.deleteGenreById(id, results => {
-        return res.json({
-          success: true,
-          message: 'Data deleted successfully',
-          results: initialResult[0]
-        })
+      await genreModels.deleteGenreById(id)
+      return res.json({
+        success: true,
+        message: 'Data deleted successfully',
+        results: initialResult[0]
       })
     } else {
       return res.json({
         success: false,
-        message: 'Failed to delete data'
+        message: 'Failed to delete data, data not exist'
       })
     }
-  })
+  } catch (error) {
+    responseStatus.serverError(res)
+  }
 }
 
-exports.updateGenre = (req, res) => {
+exports.updateGenre = async (req, res) => {
   const { id } = req.params
   const data = req.body
-  genreModels.getGenreByid(id, initialResult => {
+  try {
+    const initialResult = await genreModels.getGenreByid(id)
     if (initialResult.length > 0) {
-      genreModels.updateGenre(id, data, results => {
-        return res.json({
-          success: true,
-          message: 'Update data success',
-          results: {
-            ...initialResult[0],
-            ...data
-          }
-        })
+      await genreModels.updateGenre(id, data)
+      return res.json({
+        success: true,
+        message: 'Update data success',
+        results: {
+          ...initialResult[0],
+          ...data
+        }
       })
     } else {
       return res.json({
@@ -118,7 +128,9 @@ exports.updateGenre = (req, res) => {
         message: 'Failed to update data'
       })
     }
-  })
+  } catch (error) {
+    responseStatus.serverError(res)
+  }
 }
 
 // const { LIMIT_DATA, APP_URL } = process.env

@@ -19,3 +19,10 @@ exports.errorInputForm = (res) => {
     results: []
   })
 }
+
+exports.usernameIsExist = (res) => {
+  return res.status(400).json({
+    success: false,
+    message: 'Registered failed, username already exist'
+  })
+}

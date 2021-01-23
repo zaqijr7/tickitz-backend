@@ -97,6 +97,8 @@ exports.createMovie = async (req, res) => {
           await movieInfoModels.createBulkMovieInfo(initialResults.insertId, selectedGenre)
         }
         const movies = await movieModels.getMovieByIdWithGenreAsync(initialResults.insertId)
+        const dataGenre = movies.map(item => item.genreName)
+        await movieModels.insertGenreinMovie(initialResults.insertId, dataGenre)
         if (movies.length > 0) {
           return res.json({
             success: true,
@@ -129,21 +131,23 @@ exports.createMovie = async (req, res) => {
   })
 }
 
-exports.getDetailMovieById = (req, res) => {
+exports.getDetailMovieById = async (req, res) => {
   const { id } = req.params
-  movieModels.getMovieById(id, results => {
-    if (results.length > 0) {
+  try {
+    const getMovieId = await movieModels.getMovieByIdAsync(id)
+    if (getMovieId.length > 0) {
       return res.json({
         success: true,
         message: 'Detail Of Movie',
-        results: results[0]
+        results: getMovieId[0]
       })
     }
+  } catch (error) {
     return res.status(400).json({
       success: false,
-      message: 'Movies not exixts'
+      message: 'Movie not exixts'
     })
-  })
+  }
 }
 
 exports.deleteMovie = async (req, res) => {
@@ -160,7 +164,7 @@ exports.deleteMovie = async (req, res) => {
     } else {
       return res.status(400).json({
         success: false,
-        message: 'Failed to delete data'
+        message: 'Failed to delete data, file not exist'
       })
     }
   } catch (error) {
@@ -191,6 +195,7 @@ exports.updateMovie = (req, res) => {
     }
   })
 }
+
 exports.updateMoviee = (req, res) => {
   upload(req, res, async err => {
     const data = req.body
@@ -247,11 +252,15 @@ exports.updateMoviee = (req, res) => {
     }
 
     try {
+      await movieInfoModels.deleteGenre(id)
       const initialResults = await movieModels.updateMovie(id, movieData)
-      console.log(initialResults)
       if (initialResults.affectedRows > 0) {
+        if (selectedGenre.length > 0) {
+          await movieInfoModels.createBulkMovieInfo(id, selectedGenre)
+        }
         const movies = await movieModels.getMovieByIdWithGenreAsync(id)
-        console.log(movies)
+        const dataGenre = movies.map(item => item.genreName)
+        await movieModels.insertGenreinMovie(id, dataGenre)
         if (movies.length > 0) {
           return res.json({
             success: true,

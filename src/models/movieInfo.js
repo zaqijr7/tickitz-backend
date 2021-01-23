@@ -16,7 +16,7 @@ exports.createMovieInfo = (data = {}, cb) => {
 
 exports.createBulkMovieInfo = async (id, data = []) => {
   return new Promise((resolve, reject) => {
-    const query = db.query(`
+    db.query(`
     INSERT INTO movies_info
     (idMovie, idGenre)
     VALUES
@@ -25,7 +25,6 @@ exports.createBulkMovieInfo = async (id, data = []) => {
       if (err) reject(err)
       resolve(res)
     })
-    console.log(query.sql)
   })
 }
 
@@ -34,6 +33,18 @@ exports.checkMovieInfoAsync = (data = [], cb) => {
     db.query(`
       SELECT * FROM movies_info
       WHERE idMovie IN (${data})
+      `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
+  })
+}
+
+exports.deleteGenre = (id) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
+    DELETE FROM movies_info
+    WHERE idMovie = ${id};
       `, (err, res, field) => {
       if (err) reject(err)
       resolve(res)

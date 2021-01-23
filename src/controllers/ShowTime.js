@@ -1,4 +1,5 @@
 const showTimeModel = require('../models/ShowTime')
+const responseStatus = require('../helpers/responseStatus')
 const nextLink = require('../middlewares/nextLink')
 const prevLink = require('../middlewares/prevLink')
 const { APP_URL, APP_PORT } = process.env
@@ -13,25 +14,29 @@ exports.createShowTime = async (req, res) => {
       results: []
     })
   }
-  const initialResults = await showTimeModel.createShowTimetAsync(data)
-  if (initialResults.affectedRows > 0) {
-    const seat = await showTimeModel.getShowTimeByIdAsync(initialResults.insertId)
-    if (seat.length > 0) {
-      return res.json({
-        success: true,
-        message: 'Created Show TIme Successfully',
-        results: seat[0]
-      })
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: 'Failed to Create Seat'
-      })
+  try {
+    const initialResults = await showTimeModel.createShowTimetAsync(data)
+    if (initialResults.affectedRows > 0) {
+      const seat = await showTimeModel.getShowTimeByIdAsync(initialResults.insertId)
+      if (seat.length > 0) {
+        return res.json({
+          success: true,
+          message: 'Created Show TIme Successfully',
+          results: seat[0]
+        })
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: 'Failed to Create Seat'
+        })
+      }
     }
+  } catch (error) {
+    responseStatus.serverError(res)
   }
 }
 
-exports.listShowTime = (req, res) => {
+exports.listShowTime = async (req, res) => {
   const cond = req.query
   cond.search = cond.search || ''
   cond.page = Number(cond.page) || 1
@@ -41,63 +46,65 @@ exports.listShowTime = (req, res) => {
   cond.sort = cond.sort || 'id'
   cond.order = cond.order || 'ASC'
 
-  showTimeModel.getShowTimeByCondition(cond, results => {
-    showTimeModel.totalDataShowTime(cond, totalData => {
-      return res.json({
-        success: true,
-        message: 'List of all Show Time',
-        results,
-        pageInfo: {
-          totalData: totalData.length,
-          totalDataInCurrentPage: results.length,
-          nextLink: nextLink.nextLinkShowTime(cond, totalData, APP_URL, APP_PORT),
-          prevLink: prevLink.prevLinkShowTime(cond, totalData, APP_URL, APP_PORT)
-        }
-      })
+  try {
+    const results = await showTimeModel.getShowTimeByCondition(cond)
+    const totalData = await showTimeModel.totalDataShowTime(cond)
+    return res.json({
+      success: true,
+      message: 'List of all Show Time',
+      results,
+      pageInfo: {
+        totalData: totalData.length,
+        totalDataInCurrentPage: results.length,
+        nextLink: nextLink.nextLinkShowTime(cond, totalData, APP_URL, APP_PORT),
+        prevLink: prevLink.prevLinkShowTime(cond, totalData, APP_URL, APP_PORT)
+      }
     })
-  })
+  } catch (error) {
+    responseStatus.serverError(res)
+  }
 }
 
-exports.updateShowTime = (req, res) => {
+exports.updateShowTime = async (req, res) => {
   const { id } = req.params
   const data = req.body
-  showTimeModel.getShowTimeById(id, initialResult => {
+  try {
+    const initialResult = await showTimeModel.getShowTimeById(id)
     if (initialResult.length > 0) {
-      showTimeModel.updateShowTime(id, data, results => {
-        return res.json({
-          success: true,
-          message: 'Update data success',
-          results: {
-            ...initialResult[0],
-            ...data
-          }
-        })
+      await showTimeModel.updateShowTime(id, data)
+      return res.json({
+        success: true,
+        message: 'Update data success',
+        results: {
+          ...initialResult[0],
+          ...data
+        }
       })
     } else {
       return res.status(400).json({
         success: false,
-        message: 'Failed to update data'
+        message: 'Failed to update data, data not exist'
       })
     }
-  })
+  } catch (error) {
+    responseStatus.serverError(res)
+  }
 }
 
 exports.deleteShowTime = async (req, res) => {
   const { id } = req.params
-  showTimeModel.getShowTimeById(id, (initialResult) => {
-    if (initialResult.length > 0) {
-      showTimeModel.deleteShowTimetById(id, results => {
-        return res.json({
-          success: true,
-          message: 'Data deleted successfully',
-          results: initialResult[0]
-        })
-      })
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: 'Failed to delete data'
-      })
-    }
-  })
+  const initialResult = await showTimeModel.getShowTimeById(id)
+  if (initialResult.length > 0) {
+    await showTimeModel.deleteShowTimetById(id)
+    return res.json({
+      success: true,
+      message: 'Data deleted successfully',
+      results: initialResult[0]
+    })
+  } else {
+    return res.status(400).json({
+      success: false,
+      message: 'Failed to delete data'
+    })
+  }
 }

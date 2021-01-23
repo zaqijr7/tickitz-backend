@@ -25,57 +25,66 @@ exports.getShowTimeByIdAsync = async (id, cb) => {
   })
 }
 
-exports.getShowTimeByCondition = (cond, cb) => {
-  db.query(`
+exports.getShowTimeByCondition = (cond) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
     SELECT * FROM
     show_time WHERE name LIKE "%${cond.search}%"
     ORDER BY ${cond.sort} ${cond.order}
     LIMIT ${cond.limit} OFFSET ${cond.offset}
     `, (err, res, field) => {
-    if (err) throw err
-    cb(res)
+      if (err) reject(err)
+      resolve(res)
+    })
   })
 }
 
-exports.totalDataShowTime = (cond, cb) => {
-  db.query(`
-  SELECT * FROM
-  show_time WHERE name LIKE "%${cond.search}%"
-  `, (err, res, field) => {
-    if (err) throw err
-    cb(res)
+exports.totalDataShowTime = (cond) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
+    SELECT * FROM
+    show_time WHERE name LIKE "%${cond.search}%"
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
   })
 }
 
-exports.getShowTimeById = (id, cb) => {
-  db.query(`
+exports.getShowTimeById = (id) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
     SELECT * FROM show_time WHERE id=${id}
     `, (err, res, field) => {
-    console.log(res)
-    if (err) throw err
-    cb(res)
+      if (err) reject(err)
+      resolve(res)
+    })
   })
 }
 
 exports.updateShowTime = (id, data, cb) => {
-  const key = Object.keys(data)
-  const value = Object.values(data)
-  db.query(`
-    UPDATE show_time
-    SET ${key.map((item, index) => `${item}="${value[index]}"`)}
-    WHERE id=${id}
-  `, (err, res, field) => {
-    if (err) throw err
-    cb(res)
+  return new Promise((resolve, reject) => {
+    const key = Object.keys(data)
+    const value = Object.values(data)
+    db.query(`
+      UPDATE show_time
+      SET ${key.map((item, index) => `${item}="${value[index]}"`)}
+      WHERE id=${id}
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
   })
 }
 
-exports.deleteShowTimetById = (id, cb) => {
-  db.query(`
-  DELETE FROM show_time WHERE id=${id}
-  `, (err, res, field) => {
-    if (err) throw err
-    cb(res)
+exports.deleteShowTimetById = (id) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
+    DELETE FROM show_time WHERE id=${id}
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
   })
 }
 

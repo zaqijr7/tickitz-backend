@@ -57,7 +57,6 @@ exports.deleteMovieById = (id) => {
       resolve(res)
     })
   })
- 
 }
 
 exports.getAllMovies = (cb) => {
@@ -106,7 +105,7 @@ exports.totalDataMovie = (cond, cb) => {
 
 exports.getMovieByIdWithGenreAsync = (id) => {
   return new Promise((resolve, reject) => {
-    const query = db.query(`
+    db.query(`
     SELECT m.id, m.language, m.director, m.actors, m.title, m.synopsis,
     m.relaseDate, m.runtime, m.poster, m.price, g.name as genreName
     FROM movie m
@@ -118,6 +117,31 @@ exports.getMovieByIdWithGenreAsync = (id) => {
       if (err) reject(err)
       resolve(res)
     })
-    console.log(query.sql)
   })
 }
+
+exports.insertGenreinMovie = (id, data) => {
+  return new Promise((resolve, reject) => {
+    const dataGenre = data.join(', ')
+    db.query(`
+      UPDATE movie
+      SET genre = "${dataGenre}"
+      WHERE id=${id}
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
+  })
+}
+
+// exports.updateGenre = (id, data) => {
+//   const dataGenre = data.join(', ')
+//   db.query(`
+//       UPDATE movie_info
+//       SET idGenre = "${dataGenre}"
+//       WHERE id=${id}
+//     `, (err, res, field) => {
+//     if (err) reject(err)
+//     resolve(res)
+//   })
+// }
