@@ -3,7 +3,7 @@ const nextLink = require('../middlewares/nextLink')
 const prevLink = require('../middlewares/prevLink')
 const { APP_URL, APP_PORT } = process.env
 
-exports.createCinema = (req, res) => {
+exports.createCinema = async (req, res) => {
   const data = req.body
   const a = Object.values(data).filter((items) => items === '')
   if (a[0] === '') {
@@ -13,24 +13,24 @@ exports.createCinema = (req, res) => {
       results: []
     })
   }
-  cinemaModels.createCinema(data, (results) => {
+  try {
+    const results = await cinemaModels.createCinema(data)
     if (results.affectedRows > 0) {
-      cinemaModels.getCinemaById(results.insertId, (finalResult) => {
-        if (finalResult.length > 0) {
-          return res.json({
-            success: true,
-            message: 'Created Cinema Successfully',
-            results: finalResult[0]
-          })
-        } else {
-          return res.status(400).json({
-            success: false,
-            message: 'Failed to Create Cinema'
-          })
-        }
-      })
+      const finalResult = await cinemaModels.getCinemaById(results.insertId)
+      if (finalResult.length > 0) {
+        return res.json({
+          success: true,
+          message: 'Created Cinema Successfully',
+          results: finalResult[0]
+        })
+      }
     }
-  })
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: 'Failed to Create Cinema'
+    })
+  }
 }
 
 exports.getDetailCinema = (req, res) => {
@@ -79,46 +79,51 @@ exports.listAllCinema = (req, res) => {
 
 exports.deleteMovie = async (req, res) => {
   const { id } = req.params
-  cinemaModels.getCinemaById(id, (initialResult) => {
+  try {
+    const initialResult = await cinemaModels.getCinemaById(id)
     if (initialResult.length > 0) {
-      cinemaModels.deleteCinemaById(id, results => {
-        return res.json({
-          success: true,
-          message: 'Data deleted successfully',
-          results: initialResult[0]
-        })
+      await cinemaModels.deleteCinemaById(id)
+      return res.json({
+        success: true,
+        message: 'Data deleted successfully',
+        results: initialResult[0]
       })
     } else {
-      return res.json({
+      return res.status(400).json({
         success: false,
-        message: 'Failed to delete data'
+        message: 'Failed to delete data, file not exist'
       })
     }
-  })
+  } catch (error) {
+    return res.status(405).json({
+      success: false,
+      message: "can't be delete, because child data is exist"
+    })
+  }
 }
 
-exports.updateCinema = (req, res) => {
+exports.updateCinema = async (req, res) => {
   const { id } = req.params
   const data = req.body
-  cinemaModels.getCinemaById(id, initialResult => {
+  try {
+    const initialResult = await cinemaModels.getCinemaById(id)
     if (initialResult.length > 0) {
-      cinemaModels.updateCinema(id, data, results => {
-        return res.json({
-          success: true,
-          message: 'Update data success',
-          results: {
-            ...initialResult[0],
-            ...data
-          }
-        })
-      })
-    } else {
+      await cinemaModels.updateCinema(id, data)
       return res.json({
-        success: false,
-        message: 'Failed to update data'
+        success: true,
+        message: 'Update data success',
+        results: {
+          ...initialResult[0],
+          ...data
+        }
       })
     }
-  })
+  } catch (error) {
+    return res.json({
+      success: false,
+      message: 'Failed to update data'
+    })
+  }
 }
 
 // exports.ListCinemas = (req, res) => {

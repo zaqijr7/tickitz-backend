@@ -1,23 +1,27 @@
 const db = require('../helpers/db')
 
 exports.createCinema = (data = {}, cb) => {
-  db.query(`
-  INSERT INTO cinema
-  (${Object.keys(data).join()})
-  VALUES
-  (${Object.values(data).map(item => `"${item}"`).join(',')})
-  `, (err, res, field) => {
-    if (err) throw err
-    cb(res)
+  return new Promise((resolve, reject) => {
+    db.query(`
+    INSERT INTO cinema
+    (${Object.keys(data).join()})
+    VALUES
+    (${Object.values(data).map(item => `"${item}"`).join(',')})
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
   })
 }
 
-exports.getCinemaById = (id, cb) => {
-  db.query(`
-  SELECT * FROM cinema WHERE id=${id}
-  `, (err, res, field) => {
-    if (err) throw err
-    cb(res)
+exports.getCinemaById = (id) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
+      SELECT * FROM cinema WHERE id=${id}
+      `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
   })
 }
 
@@ -41,24 +45,28 @@ exports.getCinemaByCondition = (cond, cb) => {
 }
 
 exports.deleteCinemaById = (id, cb) => {
-  db.query(`
-  DELETE FROM cinema WHERE id=${id}
-  `, (err, res, field) => {
-    if (err) throw err
-    cb(res)
+  return new Promise((resolve, reject) => {
+    db.query(`
+    DELETE FROM cinema WHERE id=${id}
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
   })
 }
 
-exports.updateCinema = (id, data, cb) => {
-  const key = Object.keys(data)
-  const value = Object.values(data)
-  db.query(`
-    UPDATE cinema
-    SET ${key.map((item, index) => `${item}="${value[index]}"`)}
-    WHERE id=${id}
-  `, (err, res, field) => {
-    if (err) throw err
-    cb(res)
+exports.updateCinema = (id, data) => {
+  return new Promise((resolve, reject) => {
+    const key = Object.keys(data)
+    const value = Object.values(data)
+    db.query(`
+      UPDATE cinema
+      SET ${key.map((item, index) => `${item}="${value[index]}"`)}
+      WHERE id=${id}
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
   })
 }
 

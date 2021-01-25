@@ -105,11 +105,14 @@ exports.deleteSeat = async (req, res) => {
     } else {
       return res.status(400).json({
         success: false,
-        message: 'Failed to delete data'
+        message: 'Failed to delete data, file not exist'
       })
     }
   } catch (error) {
-    responseStatus.serverError(res)
+    res.status(405).json({
+      success: false,
+      message: "Can't be delete, because child data is exist"
+    })
   }
 }
 

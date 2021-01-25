@@ -168,7 +168,10 @@ exports.deleteMovie = async (req, res) => {
       })
     }
   } catch (error) {
-    responseStatus.serverError(res)
+    return res.status(405).json({
+      success: false,
+      message: "can't be delete, because child data is exist"
+    })
   }
 }
 

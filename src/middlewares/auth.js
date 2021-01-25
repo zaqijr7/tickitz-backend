@@ -44,3 +44,23 @@ exports.adminPermissions = async (req, res, next) => {
     })
   }
 }
+
+exports.usersPermissions = async (req, res, next) => {
+  const data = req.userData
+  try {
+    const checkRole = await userModel.getUsersByConditionAsync({ id: data.id })
+    if (checkRole[0].role === 'USER' || checkRole[0].role === 'ADMIN') {
+      return next()
+    } else {
+      return res.status(403).json({
+        status: false,
+        message: 'Access Forbidden'
+      })
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'There something is wrong'
+    })
+  }
+}

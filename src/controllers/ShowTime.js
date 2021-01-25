@@ -93,18 +93,25 @@ exports.updateShowTime = async (req, res) => {
 
 exports.deleteShowTime = async (req, res) => {
   const { id } = req.params
-  const initialResult = await showTimeModel.getShowTimeById(id)
-  if (initialResult.length > 0) {
-    await showTimeModel.deleteShowTimetById(id)
-    return res.json({
-      success: true,
-      message: 'Data deleted successfully',
-      results: initialResult[0]
-    })
-  } else {
-    return res.status(400).json({
+  try {
+    const initialResult = await showTimeModel.getShowTimeById(id)
+    if (initialResult.length > 0) {
+      await showTimeModel.deleteShowTimetById(id)
+      return res.json({
+        success: true,
+        message: 'Data deleted successfully',
+        results: initialResult[0]
+      })
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: 'Failed to delete data, file not exist'
+      })
+    }
+  } catch (error) {
+    return res.status(405).json({
       success: false,
-      message: 'Failed to delete data'
+      message: "can't be delete, because child data is exist"
     })
   }
 }

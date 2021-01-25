@@ -1,9 +1,8 @@
 const db = require('../helpers/db')
-exports.createTransactionAsync = (data = {}, cb) => {
-  console.log(data)
+exports.createTransactionAsync = (data = {}) => {
   return new Promise((resolve, reject) => {
     db.query(`
-    INSERT INTO transaction
+    INSERT INTO buy_ticket
     (${Object.keys(data).join()})
     VALUES
     (${Object.values(data).map(item => `"${item}"`).join(',')})
@@ -14,14 +13,31 @@ exports.createTransactionAsync = (data = {}, cb) => {
   })
 }
 
+exports.createBulkTransaction = async (data = {}) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
+    INSERT INTO buy_ticket
+    (id_user, id_movie, id_cinema, id_showtime, id_seat)
+    VALUES
+    ${data.id_seat.map(idSeat => `(${data.id_user}, ${data.id_movie}, ${data.id_cinema}, ${data.id_showtime}, ${idSeat})`).join()}
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
+  })
+}
+
 exports.getTransactionJoin = (id) => {
   return new Promise((resolve, reject) => {
     const query = db.query(`
-    SELECT m.id, m.title, s.name as seatName, st.name as showTimeName, c.name as cinemaName
-    FROM movie m
-    INNER JOIN movies_info mi ON m.id=mi.idMovie
-    INNER JOIN genre g ON g.id=mi.idGenre
-    WHERE m.id=${id}
+    SELECT users.name, movie.title, movie.price, cinema.name as cinemaName, show_time.name as showTimeName, seat.name as seatName
+    FROM buy_ticket
+    INNER JOIN users ON  users.id = buy_ticket.id_user
+    INNER JOIN movie ON movie.id = buy_ticket.id_movie
+    INNER JOIN cinema ON cinema.id = buy_ticket.id_cinema
+    INNER JOIN show_time ON show_time.id = buy_ticket.id_showtime
+    INNER JOIN seat ON seat.id = buy_ticket.id_seat
+    WHERE buy_ticket.id=${id}
   `, (err, res, field) => {
       if (err) reject(err)
       resolve(res)

@@ -14,14 +14,15 @@ exports.createSeatAsync = (data = {}, cb) => {
   })
 }
 
-exports.getSeatById = (id, cb) => {
+exports.getSeatById = (id) => {
   return new Promise((resolve, reject) => {
-    db.query(`
+    const a = db.query(`
     SELECT * FROM seat WHERE id=${id}
     `, (err, res, field) => {
       if (err) reject(err)
       resolve(res)
     })
+    console.log(a.sql)
   })
 }
 
@@ -88,14 +89,24 @@ exports.deleteSeatById = (id, cb) => {
   })
 }
 
-exports.checkIdSeatAsync = (data = [], cb) => {
+exports.checkSeatAsync = (data = [], cb) => {
   return new Promise((resolve, reject) => {
-    db.query(`
+    if (data.length > 1) {
+      db.query(`
+      SELECT * FROM seat
+      WHERE id IN (${data.map(item => item).join()})
+      `, (err, res, field) => {
+        if (err) reject(err)
+        resolve(res)
+      })
+    } else {
+      db.query(`
       SELECT * FROM seat
       WHERE id IN (${data})
       `, (err, res, field) => {
-      if (err) reject(err)
-      resolve(res)
-    })
+        if (err) reject(err)
+        resolve(res)
+      })
+    }
   })
 }
