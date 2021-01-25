@@ -1,11 +1,13 @@
 const userModel = require('../models/users')
 const responseStatus = require('../helpers/responseStatus')
+const checkForm = require('../helpers/checkForm')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const { APP_KEY } = process.env
 
 exports.login = async (req, res) => {
   const { username, password } = req.body
+  checkForm.checkFormLogin(res, username, password)
   try {
     const existingUser = await userModel.getUsersByConditionAsync({ username })
     if (existingUser.length > 0) {
@@ -21,9 +23,9 @@ exports.login = async (req, res) => {
         })
       }
     }
-    return res.status(401).json({
+    return res.status(404).json({
       success: false,
-      message: 'Login Failed'
+      message: 'Username or Password is Wrong'
     })
   } catch (error) {
     return res.status(500).json({
@@ -35,6 +37,7 @@ exports.login = async (req, res) => {
 
 exports.register = async (req, res) => {
   const { name, username, password } = req.body
+  checkForm.checkFormRegister(res, name, username, password)
   const role = 'USER'
   try {
     const usernameExist = await userModel.getUsersByConditionAsync({ username })
@@ -66,6 +69,7 @@ exports.register = async (req, res) => {
 
 exports.registerAdmin = async (req, res) => {
   const { name, username, password } = req.body
+  checkForm.checkFormRegister(res, name, username, password)
   const role = 'ADMIN'
   try {
     const usernameExist = await userModel.getUsersByConditionAsync({ username })
