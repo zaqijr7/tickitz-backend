@@ -30,7 +30,7 @@ exports.createBulkTransaction = async (data = {}) => {
 exports.getTransactionJoin = (id) => {
   return new Promise((resolve, reject) => {
     const query = db.query(`
-    SELECT users.name, movie.title, movie.price, cinema.name as cinemaName, show_time.name as showTimeName, seat.name as seatName
+    SELECT users.email, movie.title, movie.price, cinema.name as cinemaName, show_time.name as showTimeName, seat.name as seatName
     FROM buy_ticket
     INNER JOIN users ON  users.id = buy_ticket.id_user
     INNER JOIN movie ON movie.id = buy_ticket.id_movie

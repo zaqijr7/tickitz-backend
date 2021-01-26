@@ -1,6 +1,7 @@
 const cinemaModels = require('../models/cinemas')
 const nextLink = require('../middlewares/nextLink')
 const prevLink = require('../middlewares/prevLink')
+const responseStatus = require('../helpers/responseStatus')
 const { APP_URL, APP_PORT } = process.env
 
 exports.createCinema = async (req, res) => {
@@ -33,11 +34,12 @@ exports.createCinema = async (req, res) => {
   }
 }
 
-exports.getDetailCinema = (req, res) => {
+exports.getDetailCinema = async (req, res) => {
   const { id } = req.params
-  cinemaModels.getCinemaById(id, results => {
+  try {
+    const results = await cinemaModels.getCinemaById(id)
     if (results.length > 0) {
-      return res.json({
+      return res.status(200).json({
         success: true,
         message: 'Detail Of Cinema',
         results: results[0]
@@ -47,10 +49,12 @@ exports.getDetailCinema = (req, res) => {
       success: false,
       message: 'Cinema not exixts'
     })
-  })
+  } catch (error) {
+    responseStatus.serverError(res)
+  }
 }
 
-exports.listAllCinema = (req, res) => {
+exports.listAllCinema = async (req, res) => {
   const cond = req.query
   cond.search = cond.search || ''
   cond.page = Number(cond.page) || 1
@@ -59,22 +63,23 @@ exports.listAllCinema = (req, res) => {
   cond.offset = (cond.page - 1) * cond.limit
   cond.sort = cond.sort || 'id'
   cond.order = cond.order || 'ASC'
-
-  cinemaModels.getCinemaByCondition(cond, results => {
-    cinemaModels.totalDataCinema(cond, totalData => {
-      return res.json({
-        success: true,
-        message: 'List of all Cinema',
-        results,
-        pageInfo: {
-          totalData: totalData.length,
-          totalDataInCurrentPage: results.length,
-          nextLink: nextLink.nextLinkCinema(cond, totalData, APP_URL, APP_PORT),
-          prevLink: prevLink.prevLinkCinema(cond, totalData, APP_URL, APP_PORT)
-        }
-      })
+  try {
+    const results = await cinemaModels.getCinemaByCondition(cond)
+    const totalData = await cinemaModels.totalDataCinema(cond)
+    return res.json({
+      success: true,
+      message: 'List of all Cinema',
+      results,
+      pageInfo: {
+        totalData: totalData.length,
+        totalDataInCurrentPage: results.length,
+        nextLink: nextLink.nextLinkCinema(cond, totalData, APP_URL, APP_PORT),
+        prevLink: prevLink.prevLinkCinema(cond, totalData, APP_URL, APP_PORT)
+      }
     })
-  })
+  } catch (error) {
+    responseStatus.serverError(res)
+  }
 }
 
 exports.deleteMovie = async (req, res) => {

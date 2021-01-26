@@ -32,15 +32,17 @@ exports.getAllCinema = (cb) => {
   })
 }
 
-exports.getCinemaByCondition = (cond, cb) => {
-  db.query(`
-    SELECT * FROM
-    cinema WHERE name LIKE "%${cond.search}%"
-    ORDER BY ${cond.sort} ${cond.order}
-    LIMIT ${cond.limit} OFFSET ${cond.offset}
-    `, (err, res, field) => {
-    if (err) throw err
-    cb(res)
+exports.getCinemaByCondition = (cond) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
+      SELECT * FROM
+      cinema WHERE name LIKE "%${cond.search}%"
+      ORDER BY ${cond.sort} ${cond.order}
+      LIMIT ${cond.limit} OFFSET ${cond.offset}
+      `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
   })
 }
 
@@ -70,13 +72,15 @@ exports.updateCinema = (id, data) => {
   })
 }
 
-exports.totalDataCinema = (cond, cb) => {
-  db.query(`
-  SELECT * FROM
-  cinema WHERE name LIKE "%${cond.search}%"
-  `, (err, res, field) => {
-    if (err) throw err
-    cb(res)
+exports.totalDataCinema = (cond) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
+    SELECT * FROM
+    cinema WHERE name LIKE "%${cond.search}%"
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
   })
 }
 

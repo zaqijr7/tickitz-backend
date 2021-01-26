@@ -2,7 +2,7 @@ const db = require('../helpers/db')
 
 exports.createUserAsync = (data = {}) => {
   return new Promise((resolve, reject) => {
-    const sql = db.query(`
+    db.query(`
     INSERT INTO users
     (${Object.keys(data).join()})
     VALUES
@@ -11,19 +11,18 @@ exports.createUserAsync = (data = {}) => {
       if (err) reject(err)
       resolve(res)
     })
-    console.log(sql.sql)
   })
 }
 
 exports.getUsersByConditionAsync = (cond) => {
-  console.log(cond)
   return new Promise((resolve, reject) => {
-    db.query(`
+    const query = db.query(`
     SELECT * FROM users WHERE ${Object.keys(cond).map(item => `${item}="${cond[item]}"`).join(' AND ')}
     `, (err, res, field) => {
       if (err) reject(err)
       resolve(res)
     })
+    console.log(query.sql)
   })
 }
 

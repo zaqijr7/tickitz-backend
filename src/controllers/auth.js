@@ -1,15 +1,13 @@
 const userModel = require('../models/users')
 const responseStatus = require('../helpers/responseStatus')
-const checkForm = require('../helpers/checkForm')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const { APP_KEY } = process.env
 
 exports.login = async (req, res) => {
-  const { username, password } = req.body
-  checkForm.checkFormLogin(res, username, password)
+  const { email, password } = req.body
   try {
-    const existingUser = await userModel.getUsersByConditionAsync({ username })
+    const existingUser = await userModel.getUsersByConditionAsync({ email })
     if (existingUser.length > 0) {
       const compare = await bcrypt.compare(password, existingUser[0].password)
       if (compare) {
@@ -19,13 +17,17 @@ exports.login = async (req, res) => {
         return res.status(200).json({
           success: true,
           message: 'Login Successfully',
-          token
+          results: {
+            email: existingUser[0].email,
+            token
+          }
+
         })
       }
     }
     return res.status(404).json({
       success: false,
-      message: 'Username or Password is Wrong'
+      message: 'Email or Password is Wrong'
     })
   } catch (error) {
     return res.status(500).json({
@@ -36,22 +38,20 @@ exports.login = async (req, res) => {
 }
 
 exports.register = async (req, res) => {
-  const { name, username, password } = req.body
-  checkForm.checkFormRegister(res, name, username, password)
+  const { email, password } = req.body
   const role = 'USER'
   try {
-    const usernameExist = await userModel.getUsersByConditionAsync({ username })
-    if (usernameExist.length > 0) {
-      return responseStatus.usernameIsExist(res)
+    const emailExist = await userModel.getUsersByConditionAsync({ email })
+    if (emailExist.length > 0) {
+      return responseStatus.emailIsExist(res)
     }
     const salt = await bcrypt.genSalt()
     const encryptedPassword = await bcrypt.hash(password, salt)
-    const createUser = await userModel.createUserAsync({ name, username, password: encryptedPassword, role: role })
+    const createUser = await userModel.createUserAsync({ email, password: encryptedPassword, role: role })
     if (createUser.affectedRows > 0) {
       const result = await userModel.getUserById(createUser.insertId)
       const dataUser = {
-        name: result[0].name,
-        username: result[0].username
+        email: result[0].email
       }
       return res.status(200).json({
         success: true,
@@ -68,22 +68,21 @@ exports.register = async (req, res) => {
 }
 
 exports.registerAdmin = async (req, res) => {
-  const { name, username, password } = req.body
-  checkForm.checkFormRegister(res, name, username, password)
+  const { email, password } = req.body
   const role = 'ADMIN'
   try {
-    const usernameExist = await userModel.getUsersByConditionAsync({ username })
-    if (usernameExist.length > 0) {
-      return responseStatus.usernameIsExist(res)
+    const emailExist = await userModel.getUsersByConditionAsync({ email })
+    if (emailExist.length > 0) {
+      return responseStatus.emailIsExist(res)
     }
     const salt = await bcrypt.genSalt()
     const encryptedPassword = await bcrypt.hash(password, salt)
-    const createUser = await userModel.createUserAsync({ name, username, password: encryptedPassword, role: role })
+    const createUser = await userModel.createUserAsync({ email, password: encryptedPassword, role: role })
     if (createUser.affectedRows > 0) {
       const result = await userModel.getUserById(createUser.insertId)
       const dataUser = {
         name: result[0].name,
-        username: result[0].username
+        email: result[0].email
       }
       return res.status(200).json({
         success: true,
