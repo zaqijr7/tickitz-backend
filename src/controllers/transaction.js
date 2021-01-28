@@ -10,7 +10,6 @@ exports.createTransaction = async (req, res) => {
   try {
     const data = req.body
     const id = req.userData.id
-    console.log(id, ' iniid mu')
     const transactionData = {
       id_user: id,
       ...data

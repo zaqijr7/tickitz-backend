@@ -1,4 +1,5 @@
 const userModel = require('../models/users')
+const profileModel = require('../models/profile')
 const responseStatus = require('../helpers/responseStatus')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
@@ -48,6 +49,7 @@ exports.register = async (req, res) => {
     const salt = await bcrypt.genSalt()
     const encryptedPassword = await bcrypt.hash(password, salt)
     const createUser = await userModel.createUserAsync({ email, password: encryptedPassword, role: role })
+    await profileModel.createProfile({ id_user: createUser.insertId })
     if (createUser.affectedRows > 0) {
       const result = await userModel.getUserById(createUser.insertId)
       const dataUser = {
@@ -78,6 +80,7 @@ exports.registerAdmin = async (req, res) => {
     const salt = await bcrypt.genSalt()
     const encryptedPassword = await bcrypt.hash(password, salt)
     const createUser = await userModel.createUserAsync({ email, password: encryptedPassword, role: role })
+    await profileModel.createProfile({ id_user: createUser.insertId })
     if (createUser.affectedRows > 0) {
       const result = await userModel.getUserById(createUser.insertId)
       const dataUser = {

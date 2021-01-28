@@ -16,3 +16,9 @@ exports.validationInputRegister = [
   check('email', "Email can't be empty").notEmpty().isEmail().withMessage('Please enter email correctly'),
   check('password', "Password can't be empty").notEmpty().isLength(6).withMessage('Password character length must be six')
 ]
+
+exports.validationInputProfile = [
+  check('firstName', "First name field can't be empty").notEmpty(),
+  check('lastName', "Last name field can't be empty").notEmpty(),
+  check('phoneNumber', "Phone number field can't be empty").notEmpty()
+]

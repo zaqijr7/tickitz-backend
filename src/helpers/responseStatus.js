@@ -26,3 +26,10 @@ exports.emailIsExist = (res) => {
     message: 'Registered failed, email already exist'
   })
 }
+
+exports.errorUploadPoster = (res) => {
+  return res.status(400).json({
+    success: false,
+    message: 'Only .png, .jpg and .jpeg format allowed!'
+  })
+}

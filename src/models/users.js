@@ -16,13 +16,12 @@ exports.createUserAsync = (data = {}) => {
 
 exports.getUsersByConditionAsync = (cond) => {
   return new Promise((resolve, reject) => {
-    const query = db.query(`
+    db.query(`
     SELECT * FROM users WHERE ${Object.keys(cond).map(item => `${item}="${cond[item]}"`).join(' AND ')}
     `, (err, res, field) => {
       if (err) reject(err)
       resolve(res)
     })
-    console.log(query.sql)
   })
 }
 
@@ -31,6 +30,32 @@ exports.getUserById = (id) => {
     db.query(`
     SELECT * FROM users WHERE id=${id}
     `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
+  })
+}
+
+exports.updatePassword = (id, password) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
+    UPDATE users
+    SET password="${password}"
+    WHERE id=${id}
+  `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
+  })
+}
+
+exports.updateEmail = (id, email) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
+    UPDATE users
+    SET email="${email}"
+    WHERE id=${id}
+  `, (err, res, field) => {
       if (err) reject(err)
       resolve(res)
     })

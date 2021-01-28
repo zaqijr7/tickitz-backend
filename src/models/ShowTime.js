@@ -99,3 +99,25 @@ exports.checkIdShowTimeAsync = (data = [], cb) => {
     })
   })
 }
+
+exports.checkShowTimeAsync = (data = [], cb) => {
+  return new Promise((resolve, reject) => {
+    if (data.length > 1) {
+      db.query(`
+      SELECT * FROM show_time
+      WHERE id IN (${data.map(item => item).join()})
+      `, (err, res, field) => {
+        if (err) reject(err)
+        resolve(res)
+      })
+    } else {
+      db.query(`
+      SELECT * FROM show_time
+      WHERE id IN (${data})
+      `, (err, res, field) => {
+        if (err) reject(err)
+        resolve(res)
+      })
+    }
+  })
+}

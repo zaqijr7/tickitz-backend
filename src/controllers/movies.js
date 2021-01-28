@@ -142,11 +142,12 @@ exports.getDetailMovieById = async (req, res) => {
         results: getMovieId[0]
       })
     }
-  } catch (error) {
     return res.status(400).json({
       success: false,
       message: 'Movie not exixts'
     })
+  } catch (error) {
+    responseStatus.serverError(res)
   }
 }
 
@@ -250,7 +251,7 @@ exports.updateMoviee = (req, res) => {
       synopsis: data.synopsis,
       relaseDate: data.relaseDate,
       runtime: data.runtime,
-      poster: (req.file && req.file.path) || null,
+      poster: `${APP_URL}${APP_PORT}/${String(req.file.path)}` || null,
       price: data.price
     }
 
