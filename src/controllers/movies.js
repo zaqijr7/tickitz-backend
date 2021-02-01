@@ -6,11 +6,10 @@ const nextLink = require('../middlewares/nextLink')
 const prevLink = require('../middlewares/prevLink')
 const multer = require('multer')
 const upload = require('../helpers/uploads').single('poster')
-// const checkForm = require('../middlewares/checkFormMovie')
 const { APP_URL, APP_PORT } = process.env
 // const data = require('../helpers/listMovies')
 
-exports.listMovies = (req, res) => {
+exports.listMovies = async (req, res) => {
   const cond = req.query
   cond.search = cond.search || ''
   cond.page = Number(cond.page) || 1
@@ -19,22 +18,23 @@ exports.listMovies = (req, res) => {
   cond.offset = (cond.page - 1) * cond.limit
   cond.sort = cond.sort || 'id'
   cond.order = cond.order || 'ASC'
-
-  movieModels.getMoviesByCondition(cond, results => {
-    movieModels.totalDataMovie(cond, totalData => {
-      return res.json({
-        success: true,
-        message: 'List of all Movies',
-        results,
-        pageInfo: {
-          totalData: totalData.length,
-          totalDataInCurrentPage: results.length,
-          nextLink: nextLink.nextLinkMovies(cond, totalData, APP_URL, APP_PORT),
-          prevLink: prevLink.prevLinkMovies(cond, totalData, APP_URL, APP_PORT)
-        }
-      })
+  try {
+    const results = await movieModels.getMoviesByCondition(cond)
+    const totalData = await movieModels.totalDataMovie(cond)
+    return res.json({
+      success: true,
+      message: 'List of all Movies',
+      results,
+      pageInfo: {
+        totalData: totalData.length,
+        totalDataInCurrentPage: results.length,
+        nextLink: nextLink.nextLinkMovies(cond, totalData, APP_URL, APP_PORT),
+        prevLink: prevLink.prevLinkMovies(cond, totalData, APP_URL, APP_PORT)
+      }
     })
-  })
+  } catch (err) {
+    responseStatus.serverError(res)
+  }
 }
 
 exports.createMovie = async (req, res) => {
@@ -78,6 +78,7 @@ exports.createMovie = async (req, res) => {
         responseStatus.serverError(res)
       }
     }
+
     const movieData = {
       language: data.language,
       genre: data.genre,
@@ -87,7 +88,7 @@ exports.createMovie = async (req, res) => {
       synopsis: data.synopsis,
       relaseDate: data.relaseDate,
       runtime: data.runtime,
-      poster: (req.file && req.file.path) || null,
+      poster: `${APP_URL}${APP_PORT}/${req.file.destination}/${req.file.filename}` || null,
       price: data.price
     }
     try {
@@ -251,7 +252,7 @@ exports.updateMoviee = (req, res) => {
       synopsis: data.synopsis,
       relaseDate: data.relaseDate,
       runtime: data.runtime,
-      poster: `${APP_URL}${APP_PORT}/${String(req.file.path)}` || null,
+      poster: `${APP_URL}${APP_PORT}/${req.file.destination}/${req.file.filename}` || null,
       price: data.price
     }
 

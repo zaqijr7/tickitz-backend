@@ -63,3 +63,27 @@ exports.forgotPassword = async (req, res) => {
     message: 'Token sent successfully '
   })
 }
+
+exports.getUsers = async (req, res) => {
+  const email = req.body
+  try {
+    const data = await userModel.getUsersByConditionAsync(email)
+    console.log(data.length)
+    const dataFinally = {
+      id: data[0].id,
+      email: data[0].email,
+      role: data[0].role
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'User Match',
+      results: dataFinally
+    })
+  } catch (err) {
+    return res.status(404).json({
+      success: true,
+      message: 'User not exist'
+    })
+  }
+}

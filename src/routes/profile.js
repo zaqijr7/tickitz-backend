@@ -8,6 +8,8 @@ routes.put('/', authMiddleware.authCheck,
   validationInputProfile,
   validationInput,
   profileController.updateProfile)
+
+routes.get('/', profileController.getUsers)
 // routes.patch('/:id', authMiddleware.authCheck, authMiddleware.usersPermissions, profileController.updateProfile)
 
 module.exports = routes

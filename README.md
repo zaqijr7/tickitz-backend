@@ -37,7 +37,11 @@
 - GET `/shw-times` Route for get all Show TIme by User
 - GET `/seat` Route for get all Seats by User
 - GET `/genre` Route for get all Genres by User
+- PUT `/profile` Route for Update Profile
+- POST `/auth/login` Route for Login User and Admin
 - POST `/transaction` Route for Buy Ticket
+- POST `/register` Route for Register User
+- POST `/admin/register` Route for Register Admin
 - POST `admin/movies` Route for register new Movies
 - POST `admin/cinemas` Route for register new Cinema
 - POST `admin/shw-time` Route for register new Show Time

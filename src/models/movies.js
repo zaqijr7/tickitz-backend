@@ -66,15 +66,17 @@ exports.getAllMovies = (cb) => {
   })
 }
 
-exports.getMoviesByCondition = (cond, cb) => {
-  db.query(`
-    SELECT * FROM
-    movie WHERE title LIKE "%${cond.search}%"
-    ORDER BY ${cond.sort} ${cond.order}
-    LIMIT ${cond.limit} OFFSET ${cond.offset}
-    `, (err, res, field) => {
-    if (err) throw err
-    cb(res)
+exports.getMoviesByCondition = (cond) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
+          SELECT * FROM
+          movie WHERE title LIKE "%${cond.search}%"
+          ORDER BY ${cond.sort} ${cond.order}
+          LIMIT ${cond.limit} OFFSET ${cond.offset}
+          `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
   })
 }
 
@@ -93,13 +95,15 @@ exports.updateMovie = (id, data) => {
   })
 }
 
-exports.totalDataMovie = (cond, cb) => {
-  db.query(`
-  SELECT * FROM
-  movie WHERE title LIKE "%${cond.search}%"
-  `, (err, res, field) => {
-    if (err) throw err
-    cb(res)
+exports.totalDataMovie = (cond) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
+      SELECT * FROM
+      movie WHERE title LIKE "%${cond.search}%"
+      `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
   })
 }
 
