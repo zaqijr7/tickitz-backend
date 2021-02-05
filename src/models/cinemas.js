@@ -26,9 +26,11 @@ exports.getCinemaById = (id) => {
 }
 
 exports.getAllCinema = (cb) => {
-  db.query('SELECT * FROM cinema', (err, res, field) => {
-    if (err) throw err
-    cb(res)
+  return new Promise((resolve, reject) => {
+    db.query('SELECT * FROM cinema', (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
   })
 }
 

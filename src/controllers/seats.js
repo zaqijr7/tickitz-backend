@@ -136,3 +136,18 @@ exports.getSeatById = async (req, res) => {
     responseStatus.serverError(res)
   }
 }
+
+exports.listSoldSeat = async (req, res) => {
+  const data = req.query
+  try {
+    const dataSold = await seatModel.checkSoldSeat(data)
+    console.log(dataSold)
+    res.status(200).json({
+      success: true,
+      message: 'List Sold Seat',
+      results: dataSold[0]
+    })
+  } catch (err) {
+    responseStatus.serverError(res)
+  }
+}

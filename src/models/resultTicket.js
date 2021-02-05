@@ -1,7 +1,7 @@
 const db = require('../helpers/db')
 exports.createResultTicketAsync = (data = {}) => {
   return new Promise((resolve, reject) => {
-    db.query(`
+    const q = db.query(`
     INSERT INTO result_ticket
     (${Object.keys(data).join()})
     VALUES
@@ -10,6 +10,7 @@ exports.createResultTicketAsync = (data = {}) => {
       if (err) reject(err)
       resolve(res)
     })
+    console.log(q.sql)
   })
 }
 

@@ -115,3 +115,18 @@ exports.deleteShowTime = async (req, res) => {
     })
   }
 }
+
+exports.getShowTimeById = async (req, res) => {
+  const { id } = req.params
+  try {
+    const initialResult = await showTimeModel.getShowTimeById(id)
+    console.log(initialResult)
+    res.status(200).json({
+      success: true,
+      message: 'Detail showtime',
+      results: initialResult[0]
+    })
+  } catch (err) {
+    responseStatus.serverError(res)
+  }
+}

@@ -110,3 +110,17 @@ exports.checkSeatAsync = (data = [], cb) => {
     }
   })
 }
+
+exports.checkSoldSeat = (data) => {
+  return new Promise((resolve, reject) => {
+    const q = db.query(`
+    SELECT group_concat(DISTINCT listSeat separator ',') as listSold FROM result_ticket 
+    WHERE movie LIKE '%${data.movie}%' AND cinema LIKE '%${data.cinema}%' AND showTime LIKE '%${data.showTime}%' 
+    AND showDate LIKE '%${data.showDate}%'
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
+    console.log(q.sql)
+  })
+}

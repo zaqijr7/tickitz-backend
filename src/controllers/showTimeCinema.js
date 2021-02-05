@@ -1,4 +1,5 @@
 const showTimeModel = require('../models/ShowTime')
+const moment = require('moment')
 const cinemaModel = require('../models/cinemas')
 const showTimeCinemaModel = require('../models/showTimeCinema')
 const responseStatus = require('../helpers/responseStatus')
@@ -34,6 +35,7 @@ exports.createShowTimeCinema = async (req, res) => {
     }
     if (data.id_show_time.length > 1) {
       const initialResults = await showTimeCinemaModel.createBulkShowTimeCinema(data)
+      console.log(initialResults)
       if (initialResults.affectedRows > 0) {
         const resultData = []
         for (let index = 0; index < initialResults.affectedRows; index++) {
@@ -74,6 +76,44 @@ exports.createShowTimeCinema = async (req, res) => {
       message: 'Failed to Create Transaction'
     })
   } catch (error) {
+    responseStatus.serverError(res)
+  }
+}
+
+exports.scheduleCinema = async (req, res) => {
+  const data = req.body
+  console.log(data, '<<<< ini data requset')
+  data.city = data.city || 'Jakarta'
+  data.showDate = data.showDate || moment(new Date()).format('YYYY-MM-DD')
+  try {
+    const results = await showTimeCinemaModel.listSchedule(data)
+    const hasil = []
+    for (let index = 0; index < results.length; index++) {
+      const FetchData = {
+        id_cinema: results[index].id_cinema,
+        name: results[index].name,
+        city: results[index].city,
+        address: results[index].address,
+        logo: results[index].logo,
+        showDate: results[index].showDate,
+        listShowTime: await Promise.all(results[index].listShowTime.split(',').map(item => showTimeModel.getShowTimeNameById(item)))
+      }
+      hasil.push(FetchData)
+    }
+    console.log(hasil)
+    if (results.length > 0) {
+      res.status(200).json({
+        success: true,
+        message: 'List schedule cinema',
+        results: hasil
+      })
+    } else {
+      res.status(404).json({
+        success: false,
+        message: 'Opss Sorry, Schedule not Found'
+      })
+    }
+  } catch (err) {
     responseStatus.serverError(res)
   }
 }

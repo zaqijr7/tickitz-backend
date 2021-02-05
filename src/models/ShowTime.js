@@ -62,6 +62,17 @@ exports.getShowTimeById = (id) => {
   })
 }
 
+exports.getShowTimeNameById = (id) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
+    SELECT id, name FROM show_time WHERE id=${id}
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
+  })
+}
+
 exports.updateShowTime = (id, data, cb) => {
   return new Promise((resolve, reject) => {
     const key = Object.keys(data)

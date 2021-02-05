@@ -107,6 +107,18 @@ exports.totalDataMovie = (cond) => {
   })
 }
 
+exports.totalDataMovieByMonth = (date) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
+      SELECT * FROM
+      movie WHERE relaseDate LIKE "%${date}%"
+      `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
+  })
+}
+
 exports.getMovieByIdWithGenreAsync = (id) => {
   return new Promise((resolve, reject) => {
     db.query(`
@@ -135,6 +147,21 @@ exports.insertGenreinMovie = (id, data) => {
       if (err) reject(err)
       resolve(res)
     })
+  })
+}
+
+exports.getMoviesByMonth = (date, cond) => {
+  return new Promise((resolve, reject) => {
+    const q = db.query(`
+          SELECT * FROM
+          movie WHERE relaseDate LIKE "%${date}%"
+          ORDER BY ${cond.sort} ${cond.order}
+          LIMIT ${cond.limit} OFFSET ${cond.offset}
+          `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
+    console.log(q.sql)
   })
 }
 

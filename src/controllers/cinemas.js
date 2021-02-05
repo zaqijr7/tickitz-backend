@@ -1,37 +1,54 @@
 const cinemaModels = require('../models/cinemas')
+const upload = require('../helpers/uploads').single('logo')
+const multer = require('multer')
 const nextLink = require('../middlewares/nextLink')
 const prevLink = require('../middlewares/prevLink')
 const responseStatus = require('../helpers/responseStatus')
 const { APP_URL, APP_PORT } = process.env
 
 exports.createCinema = async (req, res) => {
-  const data = req.body
-  const a = Object.values(data).filter((items) => items === '')
-  if (a[0] === '') {
-    return res.status(400).json({
-      success: false,
-      message: 'Form data cannot be empty',
-      results: []
-    })
-  }
-  try {
-    const results = await cinemaModels.createCinema(data)
-    if (results.affectedRows > 0) {
-      const finalResult = await cinemaModels.getCinemaById(results.insertId)
-      if (finalResult.length > 0) {
-        return res.json({
-          success: true,
-          message: 'Created Cinema Successfully',
-          results: finalResult[0]
-        })
-      }
+  upload(req, res, async err => {
+    const data = req.body
+    const a = Object.values(data).filter((items) => items === '')
+    if (a[0] === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'Form data cannot be empty',
+        results: []
+      })
     }
-  } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: 'Failed to Create Cinema'
-    })
-  }
+    if (err instanceof multer.MulterError) {
+      responseStatus.errorUploadPoster(res)
+    } else if (err) {
+      responseStatus.errorUploadPoster(res)
+    }
+
+    try {
+      const dataCinema = {
+        name: data.name,
+        city: data.city,
+        address: data.address,
+        phone: data.phone,
+        logo: `${APP_URL}${APP_PORT}/${req.file.destination}/${req.file.filename}` || null
+      }
+      const results = await cinemaModels.createCinema(dataCinema)
+      if (results.affectedRows > 0) {
+        const finalResult = await cinemaModels.getCinemaById(results.insertId)
+        if (finalResult.length > 0) {
+          return res.json({
+            success: true,
+            message: 'Created Cinema Successfully',
+            results: finalResult[0]
+          })
+        }
+      }
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Failed to Create Cinema'
+      })
+    }
+  })
 }
 
 exports.getDetailCinema = async (req, res) => {

@@ -1,7 +1,7 @@
 const db = require('../helpers/db')
 exports.createBulkShowTimeCinema = async (data = {}) => {
   return new Promise((resolve, reject) => {
-    db.query(`
+    const q = db.query(`
     INSERT INTO showtimecinema
     (id_cinema, id_show_time, showDate)
     VALUES
@@ -10,6 +10,7 @@ exports.createBulkShowTimeCinema = async (data = {}) => {
       if (err) reject(err)
       resolve(res)
     })
+    console.log(q.sql)
   })
 }
 
@@ -34,6 +35,21 @@ exports.createShowTimeCinema = (data = {}) => {
     (${Object.keys(data).join()})
     VALUES
     (${Object.values(data).map(item => `"${item}"`).join(',')})
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
+  })
+}
+
+exports.listSchedule = (data) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
+    SELECT id_cinema, cinema.name, cinema.city, cinema.address, cinema.logo, showDate, 
+    group_concat(DISTINCT id_show_time separator ',') as listShowTime from showtimecinema
+    INNER JOIN cinema ON cinema.id=showtimecinema.id_cinema
+    WHERE cinema.city='${data.city}' AND showtimecinema.showDate='${data.showDate}'
+    group by id_cinema
     `, (err, res, field) => {
       if (err) reject(err)
       resolve(res)

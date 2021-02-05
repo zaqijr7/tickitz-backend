@@ -47,3 +47,13 @@ exports.nextLinkShowTime = (cond, totalData, url, port) => {
     return null
   }
 }
+
+exports.nextLinkMoviesNowShow = (cond, totalData, url, port) => {
+  if (cond.search.length > 0 && cond.dataLimit < totalData.length) {
+    return `${url}${port}/nowshow?limit=${cond.limit}&search=${cond.search}&page=${cond.page + 1}`
+  } else if (cond.dataLimit < totalData.length) {
+    return `${url}${port}/nowshow?limit=${cond.limit}&page=${cond.page + 1}`
+  } else {
+    return null
+  }
+}
