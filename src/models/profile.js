@@ -30,10 +30,23 @@ exports.updateProfile = (id, data) => {
   })
 }
 
+exports.updatePhotoProfile = (data) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
+      UPDATE users_profile
+      SET photo = '${data.photo}'
+      WHERE id_user=${data.id}
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
+  })
+}
+
 exports.getProfileByIdUserJoin = (id) => {
   return new Promise((resolve, reject) => {
     const query = db.query(`
-    SELECT users_profile.firstName, users_profile.lastName, users.email, users_profile.phoneNumber
+    SELECT users_profile.firstName, users_profile.lastName, users.email, users_profile.phoneNumber, users_profile.photo
     FROM users
     INNER JOIN users_profile ON users_profile.id_user=users.id
     WHERE users_profile.id_user=${id}

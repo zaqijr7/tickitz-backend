@@ -3,9 +3,9 @@ exports.createBulkShowTimeCinema = async (data = {}) => {
   return new Promise((resolve, reject) => {
     const q = db.query(`
     INSERT INTO showtimecinema
-    (id_cinema, id_show_time, showDate)
+    (id_movie, id_cinema, id_show_time, showDate)
     VALUES
-    ${data.id_show_time.map(idShowTime => `(${data.id_cinema}, ${idShowTime}, '${data.showDate}')`).join()}
+    ${data.id_show_time.map(idShowTime => `(${data.id_movie}, ${data.id_cinema}, ${idShowTime}, '${data.showDate}')`).join()}
     `, (err, res, field) => {
       if (err) reject(err)
       resolve(res)
@@ -17,7 +17,8 @@ exports.createBulkShowTimeCinema = async (data = {}) => {
 exports.getShowTimeCinemaJoin = (id) => {
   return new Promise((resolve, reject) => {
     db.query(`
-    SELECT cinema.name, cinema.city, show_time.name as showTimeName, showtimecinema.showDate FROM showtimecinema
+    SELECT movie.title, cinema.name, cinema.city, show_time.name as showTimeName, showtimecinema.showDate FROM showtimecinema
+    INNER JOIN movie ON movie.id=showtimecinema.id_movie
     INNER JOIN cinema ON cinema.id=showtimecinema.id_cinema
     INNER JOIN show_time ON show_time.id=showtimecinema.id_show_time
     WHERE showtimecinema.id = ${id}
@@ -44,12 +45,38 @@ exports.createShowTimeCinema = (data = {}) => {
 
 exports.listSchedule = (data) => {
   return new Promise((resolve, reject) => {
-    db.query(`
-    SELECT id_cinema, cinema.name, cinema.city, cinema.address, cinema.logo, showDate, 
+    const q = db.query(`
+    SELECT id_movie, id_cinema, cinema.name, cinema.city, cinema.address, cinema.logo, showDate, 
     group_concat(DISTINCT id_show_time separator ',') as listShowTime from showtimecinema
     INNER JOIN cinema ON cinema.id=showtimecinema.id_cinema
-    WHERE cinema.city='${data.city}' AND showtimecinema.showDate='${data.showDate}'
+    WHERE showtimecinema.id_movie='${data.movie}' AND cinema.city='${data.city}' AND showtimecinema.showDate='${data.showDate}'
     group by id_cinema
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
+    console.log(q.sql)
+  })
+}
+
+exports.getScheduleByCity = (idMovie) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
+    SELECT DISTINCT showtimecinema.id_movie, cinema.city FROM showtimecinema
+    INNER JOIN cinema ON cinema.id=showtimecinema.id_cinema
+    WHERE showtimecinema.id_movie ='${idMovie}'
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
+  })
+}
+
+exports.getScheduleByDate = (idMovie) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
+    SELECT DISTINCT showtimecinema.id_movie, showtimecinema.showDate FROM showtimecinema
+    WHERE showtimecinema.id_movie ='${idMovie}'
     `, (err, res, field) => {
       if (err) reject(err)
       resolve(res)

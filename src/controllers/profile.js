@@ -3,12 +3,14 @@ const userModel = require('../models/users')
 const responseStatus = require('../helpers/responseStatus')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const upload = require('../helpers/uploads').single('photo')
+const multer = require('multer')
 const { APP_KEY, APP_URL, APP_PORT } = process.env
 
 exports.updateProfile = async (req, res) => {
   const idUser = req.userData.id
-  console.log(idUser)
   const profile = req.body
+  console.log(profile)
   const data = {
     firstName: profile.firstName,
     lastName: profile.lastName,
@@ -17,12 +19,12 @@ exports.updateProfile = async (req, res) => {
   try {
     const results = await profileModel.updateProfile(idUser, data)
     console.log(results)
-    if (profile.password) {
+    if (profile.password !== '') {
       const salt = await bcrypt.genSalt()
       const encryptedPassword = await bcrypt.hash(profile.password, salt)
       await userModel.updatePassword(idUser, encryptedPassword)
     }
-    if (profile.email) {
+    if (profile.email !== '') {
       await userModel.updateEmail(idUser, profile.email)
     }
     if (results.affectedRows > 0) {
@@ -31,7 +33,7 @@ exports.updateProfile = async (req, res) => {
       if (finalResult.length > 0) {
         return res.json({
           success: true,
-          message: 'Profile create successfully',
+          message: 'Profile updated successfully',
           results: finalResult[0]
         })
       } else {
@@ -65,20 +67,13 @@ exports.forgotPassword = async (req, res) => {
 }
 
 exports.getUsers = async (req, res) => {
-  const email = req.body
+  const { id } = req.query
   try {
-    const data = await userModel.getUsersByConditionAsync(email)
-    console.log(data.length)
-    const dataFinally = {
-      id: data[0].id,
-      email: data[0].email,
-      role: data[0].role
-    }
-
+    const data = await userModel.getUsersProfileById(id)
     return res.status(200).json({
       success: true,
       message: 'User Match',
-      results: dataFinally
+      results: data[0]
     })
   } catch (err) {
     return res.status(404).json({
@@ -86,4 +81,30 @@ exports.getUsers = async (req, res) => {
       message: 'User not exist'
     })
   }
+}
+
+exports.updatePhoto = async (req, res) => {
+  upload(req, res, async err => {
+    const { id } = req.userData
+    console.log(id, '<<<<< ini id users')
+    if (err instanceof multer.MulterError) {
+      responseStatus.errorUploadPoster(res)
+    } else if (err) {
+      responseStatus.errorUploadPoster(res)
+    }
+    try {
+      const finallyData = {
+        id: id,
+        photo: `${APP_URL}${APP_PORT}/${req.file.destination}/${req.file.filename}` || null
+      }
+      const result = await profileModel.updatePhotoProfile(finallyData)
+      console.log(result)
+      res.status(200).json({
+        success: true,
+        message: 'Update photo profile successfully'
+      })
+    } catch (err) {
+      responseStatus.serverError(res)
+    }
+  })
 }

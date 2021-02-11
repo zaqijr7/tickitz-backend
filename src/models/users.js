@@ -61,3 +61,17 @@ exports.updateEmail = (id, email) => {
     })
   })
 }
+
+exports.getUsersProfileById = (id) => {
+  return new Promise((resolve, reject) => {
+    db.query(`
+    SELECT users.id, users_profile.firstName, users_profile.lastName, users.email, users_profile.phoneNumber, users_profile.photo 
+    FROM users_profile
+    INNER JOIN users ON users.id=users_profile.id_user 
+    WHERE users_profile.id_user='${id}'
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
+  })
+}

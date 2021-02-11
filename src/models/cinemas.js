@@ -97,3 +97,23 @@ exports.checkIdCinemaAsync = (data = [], cb) => {
     })
   })
 }
+
+exports.getLocationCinema = () => {
+  return new Promise((resolve, reject) => {
+    const q = db.query('SELECT DISTINCT cinema.city FROM cinema', (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
+    console.log(q.sql)
+  })
+}
+
+exports.getCinemaByLocation = (data) => {
+  return new Promise((resolve, reject) => {
+    db.query(`SELECT * FROM cinema
+    WHERE cinema.city='${data}'`, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
+  })
+}

@@ -42,7 +42,11 @@ exports.getTicketJoin = (id) => {
 exports.getAllTicketByIdUser = (id) => {
   return new Promise((resolve, reject) => {
     db.query(`
-    SELECT * FROM result_ticket WHERE id_user=${id}
+    SELECT result_ticket.movie, result_ticket.cinema, cinema.logo, 
+    result_ticket.showTime, result_ticket.showDate, result_ticket.listSeat,
+    result_ticket.price, result_ticket.totalPayment FROM result_ticket
+    INNER JOIN cinema ON cinema.id=result_ticket.id_cinema
+    WHERE id_user='${id}'
     `, (err, res, field) => {
       if (err) reject(err)
       resolve(res)

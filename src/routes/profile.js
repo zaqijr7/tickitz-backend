@@ -9,7 +9,13 @@ routes.put('/', authMiddleware.authCheck,
   validationInput,
   profileController.updateProfile)
 
-routes.get('/', profileController.getUsers)
+routes.patch('/',
+  authMiddleware.authCheck,
+  authMiddleware.usersPermissions,
+  profileController.updatePhoto
+)
+
+routes.get('/', authMiddleware.authCheck, authMiddleware.usersPermissions, profileController.getUsers)
 // routes.patch('/:id', authMiddleware.authCheck, authMiddleware.usersPermissions, profileController.updateProfile)
 
 module.exports = routes

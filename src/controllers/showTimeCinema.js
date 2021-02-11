@@ -1,5 +1,4 @@
 const showTimeModel = require('../models/ShowTime')
-const moment = require('moment')
 const cinemaModel = require('../models/cinemas')
 const showTimeCinemaModel = require('../models/showTimeCinema')
 const responseStatus = require('../helpers/responseStatus')
@@ -42,6 +41,7 @@ exports.createShowTimeCinema = async (req, res) => {
           resultData.push(await showTimeCinemaModel.getShowTimeCinemaJoin(initialResults.insertId++))
         }
         const finallyData = {
+          movie: resultData[0][0].title,
           cinema: resultData[0][0].name,
           showTimeList: resultData.map(items => items[0].showTimeName),
           showDate: resultData[0][0].showDate
@@ -49,7 +49,7 @@ exports.createShowTimeCinema = async (req, res) => {
 
         return res.json({
           success: true,
-          message: 'Created Transaction Successfully',
+          message: 'Created Schedule Successfully',
           results: finallyData
         })
       }
@@ -83,8 +83,6 @@ exports.createShowTimeCinema = async (req, res) => {
 exports.scheduleCinema = async (req, res) => {
   const data = req.body
   console.log(data, '<<<< ini data requset')
-  data.city = data.city || 'Jakarta'
-  data.showDate = data.showDate || moment(new Date()).format('YYYY-MM-DD')
   try {
     const results = await showTimeCinemaModel.listSchedule(data)
     const hasil = []
@@ -113,6 +111,26 @@ exports.scheduleCinema = async (req, res) => {
         message: 'Opss Sorry, Schedule not Found'
       })
     }
+  } catch (err) {
+    responseStatus.serverError(res)
+  }
+}
+
+exports.getScheduleByCondition = async (req, res) => {
+  const { idMovie } = req.query
+  try {
+    const citySchedule = await showTimeCinemaModel.getScheduleByCity(idMovie)
+    const dateSchedule = await showTimeCinemaModel.getScheduleByDate(idMovie)
+    const dataSchedule = {
+      idMovie: idMovie,
+      dateShow: dateSchedule.map(items => items.showDate),
+      city: citySchedule.map(items => items.city)
+    }
+    res.status(200).json({
+      success: true,
+      message: 'Schedule by condition',
+      results: dataSchedule
+    })
   } catch (err) {
     responseStatus.serverError(res)
   }

@@ -148,6 +148,35 @@ exports.updateCinema = async (req, res) => {
   }
 }
 
+exports.listLocationCinema = async (req, res) => {
+  try {
+    console.log('masuk ga')
+    const data = await cinemaModels.getLocationCinema()
+    res.status(200).json({
+      success: true,
+      message: 'List location cinema',
+      results: data
+    })
+  } catch (err) {
+    console.log(err)
+    responseStatus.serverError(res)
+  }
+}
+
+exports.listCinemaByLocation = async (req, res) => {
+  const keyword = req.query.city
+  try {
+    const data = await cinemaModels.getCinemaByLocation(keyword)
+    res.status(200).json({
+      success: true,
+      message: 'List cinema by location',
+      results: data
+    })
+  } catch (err) {
+    responseStatus.serverError(res)
+  }
+}
+
 // exports.ListCinemas = (req, res) => {
 //   const { page = 1, limit = LIMIT_DATA, search = null } = req.query
 //   const paging = (Number(page) * limit) - limit
