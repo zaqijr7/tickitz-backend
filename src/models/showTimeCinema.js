@@ -43,7 +43,23 @@ exports.createShowTimeCinema = (data = {}) => {
   })
 }
 
-exports.listSchedule = (data) => {
+exports.listSchedule = (data, cond) => {
+  return new Promise((resolve, reject) => {
+    const q = db.query(`
+    SELECT id_movie, id_cinema, cinema.name, cinema.city, cinema.address, cinema.logo, showDate, 
+    group_concat(DISTINCT id_show_time separator ',') as listShowTime from showtimecinema
+    INNER JOIN cinema ON cinema.id=showtimecinema.id_cinema
+    WHERE showtimecinema.id_movie='${data.movie}' AND cinema.city='${data.city}' AND showtimecinema.showDate='${data.showDate}'
+    group by id_cinema
+    LIMIT ${cond.limit} OFFSET ${cond.offset}
+    `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
+    console.log(q.sql)
+  })
+}
+exports.totalData = (data, cond) => {
   return new Promise((resolve, reject) => {
     const q = db.query(`
     SELECT id_movie, id_cinema, cinema.name, cinema.city, cinema.address, cinema.logo, showDate, 

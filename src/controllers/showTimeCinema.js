@@ -2,6 +2,9 @@ const showTimeModel = require('../models/ShowTime')
 const cinemaModel = require('../models/cinemas')
 const showTimeCinemaModel = require('../models/showTimeCinema')
 const responseStatus = require('../helpers/responseStatus')
+const nextLink = require('../middlewares/nextLink')
+const prevLink = require('../middlewares/prevLink')
+const { IP_URL_DEVICE, APP_PORT } = process.env
 
 exports.createShowTimeCinema = async (req, res) => {
   try {
@@ -82,9 +85,14 @@ exports.createShowTimeCinema = async (req, res) => {
 
 exports.scheduleCinema = async (req, res) => {
   const data = req.body
-  console.log(data, '<<<< ini data requset')
+  const cond = req.query
+  cond.page = Number(cond.page) || 1
+  cond.limit = Number(cond.limit) || 3
+  cond.dataLimit = cond.limit * cond.page
+  cond.offset = (cond.page - 1) * cond.limit
   try {
-    const results = await showTimeCinemaModel.listSchedule(data)
+    const results = await showTimeCinemaModel.listSchedule(data, cond)
+    const totalDataSchedule = await showTimeCinemaModel.totalData(data)
     const hasil = []
     for (let index = 0; index < results.length; index++) {
       const FetchData = {
@@ -92,18 +100,26 @@ exports.scheduleCinema = async (req, res) => {
         name: results[index].name,
         city: results[index].city,
         address: results[index].address,
-        logo: results[index].logo,
+        logo: `${IP_URL_DEVICE}${APP_PORT}/${results[index].logo}`,
         showDate: results[index].showDate,
         listShowTime: await Promise.all(results[index].listShowTime.split(',').map(item => showTimeModel.getShowTimeNameById(item)))
       }
       hasil.push(FetchData)
     }
-    console.log(hasil)
+    console.log(totalDataSchedule)
     if (results.length > 0) {
       res.status(200).json({
         success: true,
         message: 'List schedule cinema',
-        results: hasil
+        results: hasil,
+        pageInfo: {
+          totalData: totalDataSchedule.length,
+          totalPage: Math.ceil(totalDataSchedule.length / cond.limit),
+          dataCurrentPage: hasil.length,
+          currentPage: cond.page,
+          nextLink: nextLink.nextLinkSchedule(cond, totalDataSchedule, IP_URL_DEVICE, APP_PORT),
+          prevLink: prevLink.prevLinkSchedule(cond, totalDataSchedule, IP_URL_DEVICE, APP_PORT)
+        }
       })
     } else {
       res.status(404).json({

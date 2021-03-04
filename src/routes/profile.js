@@ -16,6 +16,7 @@ routes.patch('/',
 )
 
 routes.get('/', authMiddleware.authCheck, authMiddleware.usersPermissions, profileController.getUsers)
+routes.delete('/', authMiddleware.authCheck, authMiddleware.usersPermissions, profileController.deletePhoto)
 // routes.patch('/:id', authMiddleware.authCheck, authMiddleware.usersPermissions, profileController.updateProfile)
 
 module.exports = routes

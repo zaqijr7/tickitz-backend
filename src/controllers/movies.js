@@ -6,7 +6,7 @@ const nextLink = require('../middlewares/nextLink')
 const prevLink = require('../middlewares/prevLink')
 const multer = require('multer')
 const upload = require('../helpers/uploads').single('poster')
-const { APP_URL, APP_PORT } = process.env
+const { APP_URL, IP_URL_DEVICE, APP_PORT } = process.env
 // const data = require('../helpers/listMovies')
 
 exports.listMovies = async (req, res) => {
@@ -88,7 +88,7 @@ exports.createMovie = async (req, res) => {
       synopsis: data.synopsis,
       relaseDate: data.relaseDate,
       runtime: data.runtime,
-      poster: `${APP_URL}${APP_PORT}/${req.file.destination}/${req.file.filename}` || null,
+      poster: `${req.file.destination}/${req.file.filename}` || null,
       price: data.price
     }
     try {
@@ -136,11 +136,27 @@ exports.getDetailMovieById = async (req, res) => {
   const { id } = req.params
   try {
     const getMovieId = await movieModels.getMovieByIdAsync(id)
+    const dataFinnaly = {
+      id: getMovieId[0].id,
+      language: getMovieId[0].language,
+      genre: getMovieId[0].genre,
+      director: getMovieId[0].director,
+      actors: getMovieId[0].actors,
+      title: getMovieId[0].title,
+      synopsis: getMovieId[0].synopsis,
+      relaseDate: getMovieId[0].relaseDate,
+      runtime: getMovieId[0].runtime,
+      poster: `${IP_URL_DEVICE}${APP_PORT}/${getMovieId[0].poster}`,
+      price: getMovieId[0].price,
+      createdAt: getMovieId[0].createdAt,
+      updatedAt: getMovieId[0].updatedAt
+    }
     if (getMovieId.length > 0) {
       return res.json({
         success: true,
         message: 'Detail Of Movie',
-        results: getMovieId[0]
+        results: dataFinnaly
+
       })
     }
     return res.status(400).json({
@@ -252,7 +268,7 @@ exports.updateMoviee = (req, res) => {
       synopsis: data.synopsis,
       relaseDate: data.relaseDate,
       runtime: data.runtime,
-      poster: `${APP_URL}${APP_PORT}/${req.file.destination}/${req.file.filename}` || null,
+      poster: `${req.file.destination}/${req.file.filename}` || null,
       price: data.price
     }
 
@@ -313,16 +329,37 @@ exports.listMoviesNowShow = async (req, res) => {
     const nowMonth = date.getMonth()
     const dateNow = `${nowYear}-0${nowMonth + 1}`
     const data = await movieModels.getMoviesByMonth(dateNow, cond)
-    const totalData = await movieModels.totalDataMovieByMonth(dateNow)
+    const dataFinnally = []
+    for (let index = 0; index < data.length; index++) {
+      const items = {
+        id: data[index].id,
+        language: data[index].language,
+        genre: data[index].genre,
+        director: data[index].director,
+        actors: data[index].actors,
+        title: data[index].title,
+        synopsis: data[index].synopsis,
+        relaseDate: data[index].relaseDate,
+        runtime: data[index].runtime,
+        poster: `${IP_URL_DEVICE}${APP_PORT}/${data[index].poster}`,
+        price: data[index].price,
+        createdAt: data[index].createdAt,
+        updatedAt: data[index].updatedAt
+      }
+      dataFinnally.push(items)
+    }
+    const totalData = await movieModels.totalDataMovieByMonth(dateNow, cond)
     return res.json({
       success: true,
       message: 'List of all movies now show',
-      results: data,
+      results: dataFinnally,
       pageInfo: {
         totalData: totalData.length,
         totalDataInCurrentPage: data.length,
-        nextLink: nextLink.nextLinkMoviesNowShow(cond, totalData, APP_URL, APP_PORT),
-        prevLink: prevLink.prevLinkMovies(cond, totalData, APP_URL, APP_PORT)
+        totalPage: Math.ceil(totalData.length / cond.limit),
+        currentPage: cond.page,
+        nextLink: nextLink.nextLinkMoviesNowShow(cond, totalData, IP_URL_DEVICE, APP_PORT),
+        prevLink: prevLink.prevLinkMovies(cond, totalData, IP_URL_DEVICE, APP_PORT)
       }
     })
   } catch (err) {

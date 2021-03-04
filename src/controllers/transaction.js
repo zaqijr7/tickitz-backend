@@ -1,6 +1,7 @@
 const ticketModel = require('../models/resultTicket')
 const transaction = require('../models/transaction')
 const responseStatus = require('../helpers/responseStatus')
+const { IP_URL_DEVICE, APP_PORT } = process.env
 
 exports.createTransaction = async (req, res) => {
   try {
@@ -70,12 +71,26 @@ exports.listTicketsByIdUser = async (req, res) => {
   const id = req.userData.id
   try {
     const results = await ticketModel.getAllTicketByIdUser(id)
+    const dataFinnally = []
+    for (let index = 0; index < results.length; index++) {
+      const data = {
+        movie: results[index].movie,
+        cinema: results[index].cinema,
+        logo: `${IP_URL_DEVICE}${APP_PORT}/${results[index].logo}`,
+        showTime: results[index].showTime,
+        showDate: results[index].showDate,
+        listSeat: results[index].listSeat,
+        price: results[index].price,
+        totalPayment: results[index].totalPayment
+      }
+      dataFinnally.push(data)
+    }
     console.log(results)
     if (results.length > 0) {
       return res.status(200).json({
         success: true,
         message: 'List your ticket',
-        results: results
+        results: dataFinnally
       })
     }
     return res.status(404).json({

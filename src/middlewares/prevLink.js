@@ -1,8 +1,6 @@
 exports.prevLinkMovies = (cond, totalData, url, port) => {
-  if (cond.search.length > 0 && cond.page > 1) {
-    return `${url}${port}/admin/movies?limit=${cond.limit}&search=${cond.search}&page=${cond.page - 1}`
-  } else if (cond.page > 1) {
-    return `${url}${port}/admin/movies?limit=${cond.limit}&page=${cond.page - 1}`
+  if (cond.page > 1) {
+    return `${url}${port}/nowshow?search=${cond.search}&page=${cond.page - 1}&limit=${cond.limit}&sort=${cond.sort}&order=${cond.order}`
   } else {
     return null
   }
@@ -43,6 +41,14 @@ exports.prevLinkShowTime = (cond, totalData, url, port) => {
     return `${url}${port}/admin/shw-time?limit=${cond.limit}&search=${cond.search}&page=${cond.page - 1}`
   } else if (cond.page > 1) {
     return `${url}${port}/admin/shw-time?limit=${cond.limit}&page=${cond.page - 1}`
+  } else {
+    return null
+  }
+}
+
+exports.prevLinkSchedule = (cond, totalData, url, port) => {
+  if (cond.page > 1) {
+    return `${url}${port}/schedule?limit=${cond.limit}&page=${cond.page - 1}`
   } else {
     return null
   }

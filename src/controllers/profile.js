@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const upload = require('../helpers/uploads').single('photo')
 const multer = require('multer')
-const { APP_KEY, APP_URL, APP_PORT } = process.env
+const { APP_KEY, APP_URL, IP_URL_DEVICE, APP_PORT } = process.env
 
 exports.updateProfile = async (req, res) => {
   const idUser = req.userData.id
@@ -28,13 +28,21 @@ exports.updateProfile = async (req, res) => {
       await userModel.updateEmail(idUser, profile.email)
     }
     if (results.affectedRows > 0) {
-      const finalResult = await profileModel.getProfileByIdUserJoin(idUser)
+      const data = await profileModel.getProfileByIdUserJoin(idUser)
+      const dataFinnally = {
+        id: data[0].id,
+        firstName: data[0].firstName,
+        lastName: data[0].lastName,
+        email: data[0].email,
+        phoneNumber: data[0].phoneNumber,
+        photo: `${IP_URL_DEVICE}${APP_PORT}/${data[0].photo}`
+      }
 
-      if (finalResult.length > 0) {
+      if (data.length > 0) {
         return res.json({
           success: true,
           message: 'Profile updated successfully',
-          results: finalResult[0]
+          results: dataFinnally
         })
       } else {
         return res.status(400).json({
@@ -70,10 +78,18 @@ exports.getUsers = async (req, res) => {
   const { id } = req.query
   try {
     const data = await userModel.getUsersProfileById(id)
+    const dataFinnally = {
+      id: data[0].id,
+      firstName: data[0].firstName,
+      lastName: data[0].lastName,
+      email: data[0].email,
+      phoneNumber: data[0].phoneNumber,
+      photo: `${IP_URL_DEVICE}${APP_PORT}/${data[0].photo}`
+    }
     return res.status(200).json({
       success: true,
       message: 'User Match',
-      results: data[0]
+      results: dataFinnally
     })
   } catch (err) {
     return res.status(404).json({
@@ -95,7 +111,7 @@ exports.updatePhoto = async (req, res) => {
     try {
       const finallyData = {
         id: id,
-        photo: `${APP_URL}${APP_PORT}/${req.file.destination}/${req.file.filename}` || null
+        photo: `${req.file.destination}/${req.file.filename}` || null
       }
       const result = await profileModel.updatePhotoProfile(finallyData)
       console.log(result)
@@ -104,7 +120,33 @@ exports.updatePhoto = async (req, res) => {
         message: 'Update photo profile successfully'
       })
     } catch (err) {
-      responseStatus.serverError(res)
+      res.status(400).json({
+        success: false,
+        message: "File Can't be Empty"
+      })
     }
   })
+}
+
+exports.deletePhoto = async (req, res) => {
+  const data = req.body
+  const { id } = req.userData
+  const dataFinnally = {
+    id: id,
+    photo: `${data.photo}`
+  }
+  console.log(data, '<<< ini data')
+  try {
+    const result = await profileModel.updatePhotoProfile(dataFinnally)
+    console.log(result)
+    res.status(200).json({
+      success: true,
+      message: 'Delete photo profile successfully'
+    })
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: 'Server Error'
+    })
+  }
 }

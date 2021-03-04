@@ -4,7 +4,7 @@ const multer = require('multer')
 const nextLink = require('../middlewares/nextLink')
 const prevLink = require('../middlewares/prevLink')
 const responseStatus = require('../helpers/responseStatus')
-const { APP_URL, APP_PORT } = process.env
+const { IP_URL_DEVICE, APP_URL, APP_PORT } = process.env
 
 exports.createCinema = async (req, res) => {
   upload(req, res, async err => {
@@ -29,7 +29,7 @@ exports.createCinema = async (req, res) => {
         city: data.city,
         address: data.address,
         phone: data.phone,
-        logo: `${APP_URL}${APP_PORT}/${req.file.destination}/${req.file.filename}` || null
+        logo: `${req.file.destination}/${req.file.filename}` || null
       }
       const results = await cinemaModels.createCinema(dataCinema)
       if (results.affectedRows > 0) {
@@ -55,11 +55,22 @@ exports.getDetailCinema = async (req, res) => {
   const { id } = req.params
   try {
     const results = await cinemaModels.getCinemaById(id)
+    const dataFinnally = {
+      id: results[0].id,
+      name: results[0].name,
+      city: results[0].city,
+      address: results[0].address,
+      phone: results[0].phone,
+      logo: `${IP_URL_DEVICE}${APP_PORT}/${results[0].logo}`,
+      createdAT: results[0].createdAT,
+      updaredAt: results[0].updaredAt
+
+    }
     if (results.length > 0) {
       return res.status(200).json({
         success: true,
         message: 'Detail Of Cinema',
-        results: results[0]
+        results: dataFinnally
       })
     }
     return res.status(400).json({

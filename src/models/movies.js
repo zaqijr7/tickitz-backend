@@ -107,11 +107,12 @@ exports.totalDataMovie = (cond) => {
   })
 }
 
-exports.totalDataMovieByMonth = (date) => {
+exports.totalDataMovieByMonth = (date, cond) => {
   return new Promise((resolve, reject) => {
     db.query(`
-      SELECT * FROM
-      movie WHERE relaseDate LIKE "%${date}%"
+    SELECT * FROM
+    movie WHERE relaseDate LIKE "%${date}%" AND title LIKE "%${cond.search}%"
+    ORDER BY ${cond.sort} ${cond.order}
       `, (err, res, field) => {
       if (err) reject(err)
       resolve(res)
@@ -154,7 +155,7 @@ exports.getMoviesByMonth = (date, cond) => {
   return new Promise((resolve, reject) => {
     const q = db.query(`
           SELECT * FROM
-          movie WHERE relaseDate LIKE "%${date}%"
+          movie WHERE relaseDate LIKE "%${date}%" AND title LIKE "%${cond.search}%"
           ORDER BY ${cond.sort} ${cond.order}
           LIMIT ${cond.limit} OFFSET ${cond.offset}
           `, (err, res, field) => {
