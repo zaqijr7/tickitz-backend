@@ -49,6 +49,20 @@ exports.updatePassword = (id, password) => {
   })
 }
 
+exports.resetPasswordByEmail = (email, password) => {
+  return new Promise((resolve, reject) => {
+    const query = db.query(`
+    UPDATE users
+    SET password="${password}"
+    WHERE email="${email}"
+  `, (err, res, field) => {
+      if (err) reject(err)
+      resolve(res)
+    })
+    console.log(query.sql)
+  })
+}
+
 exports.updateEmail = (id, email) => {
   return new Promise((resolve, reject) => {
     db.query(`

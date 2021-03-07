@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const upload = require('../helpers/uploads').single('photo')
 const multer = require('multer')
+const { sendEmail } = require('../helpers/sendMailMobile')
 const { APP_KEY, APP_URL, IP_URL_DEVICE, APP_PORT } = process.env
 
 exports.updateProfile = async (req, res) => {
@@ -52,6 +53,37 @@ exports.updateProfile = async (req, res) => {
       }
     }
   } catch (error) {
+    responseStatus.serverError(res)
+  }
+}
+
+exports.sendMail = async (req, res) => {
+  const { email } = req.query
+  try {
+    const existingUser = await userModel.getUsersByConditionAsync({ email })
+    if (existingUser.length > 0) {
+      const token = jwt.sign({ email: email }, APP_KEY)
+      console.log(email, 'ini email kamu')
+      const data = {
+        email: email,
+        token: token,
+        subject: 'Reset Password',
+        html: ` <div>
+      <h3>Please click link below to reset your password</h3>
+      <a href="https://tickitz.000webhostapp.com/?token=${token}"> Reset Password <a/>
+      </div>`
+      }
+      sendEmail(data)
+      res.status(200).json({
+        success: true,
+        message: 'Please Chek Email to Reset Password'
+      })
+    }
+    res.status(404).json({
+      success: false,
+      message: 'User Not Exist'
+    })
+  } catch (err) {
     responseStatus.serverError(res)
   }
 }
@@ -148,5 +180,20 @@ exports.deletePhoto = async (req, res) => {
       success: false,
       message: 'Server Error'
     })
+  }
+}
+
+exports.resetPassword = async (req, res) => {
+  const data = req.body
+  try {
+    const salt = await bcrypt.genSalt()
+    const encryptedPassword = await bcrypt.hash(data.password, salt)
+    await userModel.resetPasswordByEmail(data.email, encryptedPassword)
+    res.status(200).json({
+      success: true,
+      message: 'Password reset successfull, you can login'
+    })
+  } catch (err) {
+    responseStatus.serverError(res)
   }
 }
