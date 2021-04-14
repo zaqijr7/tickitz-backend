@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken')
 const upload = require('../helpers/uploads').single('photo')
 const multer = require('multer')
 const { sendEmail } = require('../helpers/sendMailMobile')
-const { APP_KEY, APP_URL, IP_URL_DEVICE, APP_PORT } = process.env
+const { APP_KEY, APP_URL, IP_URL_DEVICE, APP_PORT, DOMAIN_FRONTEND_WEB } = process.env
 
 exports.updateProfile = async (req, res) => {
   const idUser = req.userData.id
@@ -192,6 +192,37 @@ exports.resetPassword = async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Password reset successfull, you can login'
+    })
+  } catch (err) {
+    responseStatus.serverError(res)
+  }
+}
+
+exports.sendMailWeb = async (req, res) => {
+  const { email } = req.params
+  console.log(email)
+  try {
+    const existingUser = await userModel.getUsersByConditionAsync({ email })
+    if (existingUser.length > 0) {
+      const token = jwt.sign({ email: email }, APP_KEY)
+      const data = {
+        email: email,
+        token: token,
+        subject: 'Reset Password',
+        html: ` <div>
+      <h3>Please click link below to reset your password</h3>
+      <a href="${DOMAIN_FRONTEND_WEB}reset?token=${token}"> Reset Password <a/>
+      </div>`
+      }
+      sendEmail(data)
+      res.status(200).json({
+        success: true,
+        message: 'Please Chek Email to Reset Password'
+      })
+    }
+    res.status(404).json({
+      success: false,
+      message: 'User Not Exist'
     })
   } catch (err) {
     responseStatus.serverError(res)

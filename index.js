@@ -15,6 +15,7 @@ app.use(cors('*'))
 
 app.use('/uploads', express.static('uploads'))
 app.use('/auth/login', require('./src/routes/auth'))
+app.use('/auth/reset', require('./src/routes/auth'))
 app.use('/auth/register', require('./src/routes/registerUser'))
 app.use('/auth/admin/login', require('./src/routes/auth'))
 app.use('/auth/admin/register', require('./src/routes/registerAdmin'))
