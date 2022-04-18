@@ -42,6 +42,7 @@ exports.createTransaction = async (req, res) => {
       }
     }
   } catch (error) {
+    console.log(error)
     responseStatus.serverError(res)
   }
 }

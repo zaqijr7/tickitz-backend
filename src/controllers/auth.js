@@ -15,23 +15,23 @@ exports.login = async (req, res) => {
         const id = existingUser[0].id
         const role = existingUser[0].role
         const token = jwt.sign({ id, role: role }, APP_KEY)
-        return res.status(200).json({
+        return res.status(200).send({
           success: true,
           message: 'Login Successfully',
           results: {
             email: existingUser[0].email,
             token
           }
-
         })
       }
     }
-    return res.status(404).json({
+    return res.status(404).send({
       success: false,
       message: 'Email or Password is Wrong'
     })
   } catch (error) {
-    return res.status(500).json({
+    console.log(error, '<<<< INI ERROR')
+    return res.status(500).send({
       success: false,
       message: responseStatus.serverError(res)
     })

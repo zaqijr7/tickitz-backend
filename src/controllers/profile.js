@@ -30,13 +30,19 @@ exports.updateProfile = async (req, res) => {
     }
     if (results.affectedRows > 0) {
       const data = await profileModel.getProfileByIdUserJoin(idUser)
+      let photo
+      if (data[0].photo === 'UNDEFINED') {
+        photo = 'UNDEFINED'
+      } else {
+        photo = `${IP_URL_DEVICE}${APP_PORT}/${data[0].photo}`
+      }
       const dataFinnally = {
         id: data[0].id,
         firstName: data[0].firstName,
         lastName: data[0].lastName,
         email: data[0].email,
         phoneNumber: data[0].phoneNumber,
-        photo: `${IP_URL_DEVICE}${APP_PORT}/${data[0].photo}`
+        photo: photo
       }
 
       if (data.length > 0) {
@@ -53,6 +59,7 @@ exports.updateProfile = async (req, res) => {
       }
     }
   } catch (error) {
+    console.log(error, 'kenapa error')
     responseStatus.serverError(res)
   }
 }
@@ -110,13 +117,19 @@ exports.getUsers = async (req, res) => {
   const { id } = req.query
   try {
     const data = await userModel.getUsersProfileById(id)
+    let photo
+    if (data[0].photo === 'UNDEFINED') {
+      photo = 'UNDEFINED'
+    } else {
+      photo = `${IP_URL_DEVICE}${APP_PORT}/${data[0].photo}`
+    }
     const dataFinnally = {
       id: data[0].id,
       firstName: data[0].firstName,
       lastName: data[0].lastName,
       email: data[0].email,
       phoneNumber: data[0].phoneNumber,
-      photo: `${IP_URL_DEVICE}${APP_PORT}/${data[0].photo}`
+      photo: photo
     }
     return res.status(200).json({
       success: true,

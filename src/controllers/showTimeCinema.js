@@ -84,15 +84,17 @@ exports.createShowTimeCinema = async (req, res) => {
 }
 
 exports.scheduleCinema = async (req, res) => {
-  const data = req.body
+  let { movie, city, showDate } = req.body
+  if (showDate === '') showDate = '1990-01-01'
+  console.log(showDate, 'INI DATE')
   const cond = req.query
   cond.page = Number(cond.page) || 1
   cond.limit = Number(cond.limit) || 3
   cond.dataLimit = cond.limit * cond.page
   cond.offset = (cond.page - 1) * cond.limit
   try {
-    const results = await showTimeCinemaModel.listSchedule(data, cond)
-    const totalDataSchedule = await showTimeCinemaModel.totalData(data)
+    const results = await showTimeCinemaModel.listSchedule(movie, city, showDate, cond)
+    const totalDataSchedule = await showTimeCinemaModel.totalData(movie, city, showDate)
     const hasil = []
     for (let index = 0; index < results.length; index++) {
       const FetchData = {
@@ -128,6 +130,7 @@ exports.scheduleCinema = async (req, res) => {
       })
     }
   } catch (err) {
+    console.log(err)
     responseStatus.serverError(res)
   }
 }

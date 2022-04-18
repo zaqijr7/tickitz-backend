@@ -43,13 +43,13 @@ exports.createShowTimeCinema = (data = {}) => {
   })
 }
 
-exports.listSchedule = (data, cond) => {
+exports.listSchedule = (movie, city, showDate, cond) => {
   return new Promise((resolve, reject) => {
     const q = db.query(`
     SELECT id_movie, id_cinema, cinema.name, cinema.city, cinema.address, cinema.logo, showDate, 
     group_concat(DISTINCT id_show_time separator ',') as listShowTime from showtimecinema
     INNER JOIN cinema ON cinema.id=showtimecinema.id_cinema
-    WHERE showtimecinema.id_movie='${data.movie}' AND cinema.city='${data.city}' AND showtimecinema.showDate='${data.showDate}'
+    WHERE showtimecinema.id_movie='${movie}' AND cinema.city='${city}' AND showtimecinema.showDate='${showDate}'
     group by id_cinema
     LIMIT ${cond.limit} OFFSET ${cond.offset}
     `, (err, res, field) => {
@@ -59,13 +59,13 @@ exports.listSchedule = (data, cond) => {
     console.log(q.sql)
   })
 }
-exports.totalData = (data, cond) => {
+exports.totalData = (movie, city, showDate) => {
   return new Promise((resolve, reject) => {
     const q = db.query(`
     SELECT id_movie, id_cinema, cinema.name, cinema.city, cinema.address, cinema.logo, showDate, 
     group_concat(DISTINCT id_show_time separator ',') as listShowTime from showtimecinema
     INNER JOIN cinema ON cinema.id=showtimecinema.id_cinema
-    WHERE showtimecinema.id_movie='${data.movie}' AND cinema.city='${data.city}' AND showtimecinema.showDate='${data.showDate}'
+    WHERE showtimecinema.id_movie='${movie}' AND cinema.city='${city}' AND showtimecinema.showDate='${showDate}'
     group by id_cinema
     `, (err, res, field) => {
       if (err) reject(err)
